@@ -1,0 +1,56 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+// 1. 飲食店テーブル
+model Restaurant {
+  id          String   @id @default(uuid())
+  name        String
+  address     String
+  latitude    Float
+  longitude   Float
+  url         String?
+  dangerLevel Int      @map("danger_level") // 珍食レベル (1〜5)
+  description String?  // 店舗紹介・目玉メニュー
+  imageUrl    String?  @map("image_url")   // 店舗・料理写真URL
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tags          Tag[]          // 暗黙的な多対多関係
+  businessHours BusinessHour[] // 一対多関係
+
+  @@map("restaurants")
+  @@index([latitude, longitude]) // マップ範囲検索高速化用
+}
+
+// 2. 食材タグテーブル
+model Tag {
+  id        String   @id // スラッグ識別子 (例: "wani", "hebi", "insect")
+  name      String   // 表示名 (例: "ワニ", "ヘビ", "昆虫食")
+  emoji     String?  // 表示用絵文字 (例: "🐊", "🐍", "🐜")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  restaurants Restaurant[]
+
+  @@map("tags")
+}
+
+// 3. 営業時間テーブル
+model BusinessHour {
+  id           String  @id @default(uuid())
+  restaurantId String  @map("restaurant_id")
+  dayOfWeek    Int     @map("day_of_week") // 0(日)〜6(土)
+  openTime     String? @map("open_time")   // "HH:MM" 形式 (定休日の場合はnull可能)
+  closeTime    String? @map("close_time")  // "HH:MM" 形式 (定休日の場合はnull可能)
+  isClosed     Boolean @default(false) @map("is_closed") // 定休日フラグ
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@map("business_hours")
+  @@index([restaurantId, dayOfWeek])
+}
