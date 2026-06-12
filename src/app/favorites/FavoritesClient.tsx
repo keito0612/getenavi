@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
+import { frontendRestaurantService } from "@/services/frontend";
 import { useFavoritesContext } from "@/contexts/FavoritesContext";
 import { PageContainer, ContentContainer, Stack } from "@/components/ui/containers";
 import { Header, BackButton, Spinner, EmptyState } from "@/components/ui";
@@ -10,7 +11,7 @@ import { FavoriteCard } from "./components/FavoriteCard";
 
 export function FavoritesClient() {
   const { favorites, isLoaded, removeFavorite } = useFavoritesContext();
-  const [restaurants, setRestaurants] = useState<RestaurantWithRelations[]>([]);
+  const [restaurants, setRestaurants] = useState<RestaurantData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -24,15 +25,11 @@ export function FavoritesClient() {
       }
 
       try {
+        // TODO: 認証実装後はfrontendFavoriteService.getFavoriteRestaurants(userId)を使用
         const results = await Promise.all(
-          favorites.map(async (id) => {
-            const res = await fetch(`/api/restaurants/${id}`);
-            if (!res.ok) return null;
-            const data = await res.json();
-            return data.restaurant as RestaurantWithRelations;
-          })
+          favorites.map((id) => frontendRestaurantService.getRestaurant(id))
         );
-        setRestaurants(results.filter((r): r is RestaurantWithRelations => r !== null));
+        setRestaurants(results.filter((r): r is RestaurantData => r !== null));
       } catch (error) {
         console.error("Failed to fetch favorites:", error);
       } finally {
@@ -60,7 +57,7 @@ export function FavoritesClient() {
 
 type ContentProps = {
   isLoading: boolean;
-  restaurants: RestaurantWithRelations[];
+  restaurants: RestaurantData[];
   onRemove: (id: string) => void;
 };
 

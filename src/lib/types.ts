@@ -1,14 +1,14 @@
 import type { Restaurant, Tag, BusinessHour } from "@prisma/client";
 
-// Restaurant with relations
-export type RestaurantWithRelations = Restaurant & {
+// フロント側で使用する飲食店データ（タグ・営業時間を含む）
+export type RestaurantData = Restaurant & {
   tags: Tag[];
   businessHours: BusinessHour[];
 };
 
 // API Response types
 export type RestaurantListResponse = {
-  restaurants: RestaurantWithRelations[];
+  restaurants: RestaurantData[];
 };
 
 export type TagListResponse = {

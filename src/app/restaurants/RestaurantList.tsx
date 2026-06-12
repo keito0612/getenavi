@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import type { Tag } from "@prisma/client";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
+import { frontendRestaurantService } from "@/services/frontend";
 import { useFavoritesContext } from "@/contexts/FavoritesContext";
 import { PageContainer, ContentContainer, Stack } from "@/components/ui/containers";
 import { Header, BackButton, Spinner, EmptyState } from "@/components/ui";
@@ -11,7 +12,7 @@ import { TagFilterBar } from "./components/TagFilterBar";
 import { RestaurantCard } from "./components/RestaurantCard";
 
 type Props = {
-  initialRestaurants: RestaurantWithRelations[];
+  initialRestaurants: RestaurantData[];
   tags: Tag[];
 };
 
@@ -31,13 +32,10 @@ export function RestaurantList({ initialRestaurants, tags }: Props) {
     setIsLoading(true);
 
     try {
-      const params = new URLSearchParams();
-      if (newSelectedTags.length > 0) {
-        params.set("tags", newSelectedTags.join(","));
-      }
-      const response = await fetch(`/api/restaurants?${params}`);
-      const data = await response.json();
-      setRestaurants(data.restaurants);
+      const results = await frontendRestaurantService.getRestaurants({
+        tags: newSelectedTags.length > 0 ? newSelectedTags : undefined,
+      });
+      setRestaurants(results);
     } catch (error) {
       console.error("Failed to fetch restaurants:", error);
     } finally {
@@ -83,7 +81,7 @@ export function RestaurantList({ initialRestaurants, tags }: Props) {
 
 type ListContentProps = {
   isLoading: boolean;
-  restaurants: RestaurantWithRelations[];
+  restaurants: RestaurantData[];
   isFavorite: (id: string) => boolean;
   onToggleFavorite: (id: string) => void;
 };

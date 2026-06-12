@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
 import { CardContainer, FlexRow } from "@/components/ui/containers";
 import { DangerLevel, TagBadge, Thumbnail } from "@/components/ui";
 
 type Props = {
-  restaurant: RestaurantWithRelations;
+  restaurant: RestaurantData;
   onRemove: () => void;
 };
 
@@ -31,7 +31,7 @@ export function FavoriteCard({ restaurant, onRemove }: Props) {
   );
 }
 
-function CardTags({ tags }: { tags: RestaurantWithRelations["tags"] }) {
+function CardTags({ tags }: { tags: RestaurantData["tags"] }) {
   return (
     <FlexRow gap="sm" wrap className="mt-2">
       {tags.slice(0, 3).map((tag) => (

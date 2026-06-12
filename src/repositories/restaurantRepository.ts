@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
 
 export interface IRestaurantRepository {
-  getRestaurants(query?: string, tagIds?: string[]): Promise<RestaurantWithRelations[]>;
-  getRestaurant(id: string): Promise<RestaurantWithRelations | null>;
+  getRestaurants(query?: string, tagIds?: string[]): Promise<RestaurantData[]>;
+  getRestaurant(id: string): Promise<RestaurantData | null>;
   getRestaurantsByBounds(
     north: number,
     south: number,
@@ -11,11 +11,11 @@ export interface IRestaurantRepository {
     west: number,
     query?: string,
     tagIds?: string[]
-  ): Promise<RestaurantWithRelations[]>;
+  ): Promise<RestaurantData[]>;
 }
 
 export class RestaurantRepository implements IRestaurantRepository {
-  async getRestaurants(query?: string, tagIds?: string[]): Promise<RestaurantWithRelations[]> {
+  async getRestaurants(query?: string, tagIds?: string[]): Promise<RestaurantData[]> {
     return prisma.restaurant.findMany({
       where: {
         ...(query
@@ -40,7 +40,7 @@ export class RestaurantRepository implements IRestaurantRepository {
     });
   }
 
-  async getRestaurant(id: string): Promise<RestaurantWithRelations | null> {
+  async getRestaurant(id: string): Promise<RestaurantData | null> {
     return prisma.restaurant.findUnique({
       where: { id },
       include: {
@@ -57,7 +57,7 @@ export class RestaurantRepository implements IRestaurantRepository {
     west: number,
     query?: string,
     tagIds?: string[]
-  ): Promise<RestaurantWithRelations[]> {
+  ): Promise<RestaurantData[]> {
     return prisma.restaurant.findMany({
       where: {
         latitude: { gte: south, lte: north },

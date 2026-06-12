@@ -1,11 +1,11 @@
 "use client";
 
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
 import { RestaurantCard } from "./RestaurantCard";
 
 type Props = {
-  restaurants: RestaurantWithRelations[];
-  onRestaurantClick: (restaurant: RestaurantWithRelations) => void;
+  restaurants: RestaurantData[];
+  onRestaurantClick: (restaurant: RestaurantData) => void;
 };
 
 export function RestaurantListPanel({ restaurants, onRestaurantClick }: Props) {

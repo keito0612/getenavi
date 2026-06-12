@@ -3,7 +3,8 @@
 import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import type { Tag } from "@prisma/client";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
+import { frontendRestaurantService } from "@/services/frontend";
 import { LoadingOverlay, MapSkeleton } from "@/components/ui";
 import { HomeHeader } from "./components/HomeHeader";
 import { TagFilter } from "./components/TagFilter";
@@ -18,29 +19,24 @@ const Map = dynamic(() => import("./components/Map").then((mod) => mod.Map), {
 
 type Props = {
   initialTags: Tag[];
-  initialRestaurants: RestaurantWithRelations[];
+  initialRestaurants: RestaurantData[];
 };
 
 export function HomeClient({ initialTags, initialRestaurants }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedRestaurant, setSelectedRestaurant] = useState<RestaurantWithRelations | null>(null);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<RestaurantData | null>(null);
   const [restaurants, setRestaurants] = useState(initialRestaurants);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchRestaurants = useCallback(async (query: string, tags: string[]) => {
     setIsLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (query) {
-        params.set("q", query);
-      }
-      if (tags.length > 0) {
-        params.set("tags", tags.join(","));
-      }
-      const response = await fetch(`/api/restaurants?${params}`);
-      const data = await response.json();
-      setRestaurants(data.restaurants);
+      const results = await frontendRestaurantService.getRestaurants({
+        query: query || undefined,
+        tags: tags.length > 0 ? tags : undefined,
+      });
+      setRestaurants(results);
     } catch (error) {
       console.error("Failed to fetch restaurants:", error);
     } finally {
@@ -62,7 +58,7 @@ export function HomeClient({ initialTags, initialRestaurants }: Props) {
     fetchRestaurants(searchQuery, newSelectedTags);
   }, [selectedTags, searchQuery, fetchRestaurants]);
 
-  const handleMarkerClick = useCallback((restaurant: RestaurantWithRelations) => {
+  const handleMarkerClick = useCallback((restaurant: RestaurantData) => {
     setSelectedRestaurant(restaurant);
   }, []);
 

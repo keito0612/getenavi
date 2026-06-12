@@ -3,12 +3,12 @@
 import { useRef, useCallback } from "react";
 import MapGL, { Marker, NavigationControl, GeolocateControl } from "react-map-gl/maplibre";
 import type { MapRef } from "react-map-gl/maplibre";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 type Props = {
-  restaurants: RestaurantWithRelations[];
-  onMarkerClick: (restaurant: RestaurantWithRelations) => void;
+  restaurants: RestaurantData[];
+  onMarkerClick: (restaurant: RestaurantData) => void;
 };
 
 // 珍食レベルに応じたマーカーの色

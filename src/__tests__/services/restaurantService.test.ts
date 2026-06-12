@@ -1,9 +1,9 @@
 import { RestaurantService } from "@/services/restaurantService";
 import { IRestaurantRepository } from "@/repositories/restaurantRepository";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
 
 describe("RestaurantService", () => {
-  const mockRestaurants: RestaurantWithRelations[] = [
+  const mockRestaurants: RestaurantData[] = [
     {
       id: "1",
       name: "珍獣屋",

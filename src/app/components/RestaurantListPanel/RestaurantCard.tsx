@@ -1,11 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
 import { DangerLevel } from "@/components/ui";
 
 type Props = {
-  restaurant: RestaurantWithRelations;
+  restaurant: RestaurantData;
   onClick: () => void;
   variant: "horizontal" | "vertical";
 };

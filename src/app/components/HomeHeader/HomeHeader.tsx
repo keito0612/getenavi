@@ -3,6 +3,7 @@
 import { FavoritesLink } from "./FavoritesLink";
 import { ListLink } from "./ListLink";
 import { SubmitLink } from "./SubmitLink";
+import { AuthLink } from "./AuthLink";
 
 export function HomeHeader() {
   return (
@@ -13,6 +14,7 @@ export function HomeHeader() {
           <FavoritesLink />
           <ListLink />
           <SubmitLink />
+          <AuthLink />
         </div>
       </div>
     </header>

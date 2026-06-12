@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
 import { CardContainer, FlexRow } from "@/components/ui/containers";
 import { FavoriteButton, DangerLevel, TagBadge, Thumbnail } from "@/components/ui";
 
 type Props = {
-  restaurant: RestaurantWithRelations;
+  restaurant: RestaurantData;
   isFavorite: boolean;
   onToggleFavorite: () => void;
 };
@@ -58,7 +58,7 @@ function CardHeader({ name, isFavorite, onToggleFavorite }: CardHeaderProps) {
   );
 }
 
-function CardTags({ tags }: { tags: RestaurantWithRelations["tags"] }) {
+function CardTags({ tags }: { tags: RestaurantData["tags"] }) {
   const visibleTags = tags.slice(0, 3);
   const remainingCount = tags.length - 3;
 

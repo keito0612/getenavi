@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
 import { useFavoritesContext } from "@/contexts/FavoritesContext";
 import {
   PageContainer,
@@ -22,7 +22,7 @@ import {
 import { BusinessHoursCard } from "./components/BusinessHoursCard";
 
 type Props = {
-  restaurant: RestaurantWithRelations;
+  restaurant: RestaurantData;
 };
 
 export function RestaurantDetail({ restaurant }: Props) {
@@ -78,7 +78,7 @@ function BasicInfo({ name, address }: { name: string; address: string }) {
   );
 }
 
-function TagsSection({ tags }: { tags: RestaurantWithRelations["tags"] }) {
+function TagsSection({ tags }: { tags: RestaurantData["tags"] }) {
   return (
     <Section label="取扱食材">
       <FlexRow gap="md" wrap>
@@ -102,7 +102,7 @@ function DescriptionSection({ description }: { description: string }) {
 
 type ActionButtonsProps = {
   url: string | null;
-  restaurant: RestaurantWithRelations;
+  restaurant: RestaurantData;
 };
 
 function ActionButtons({ url, restaurant }: ActionButtonsProps) {

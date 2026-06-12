@@ -1,6 +1,6 @@
 "use client";
 
-import type { RestaurantWithRelations } from "@/lib/types";
+import type { RestaurantData } from "@/lib/types";
 import { useFavoritesContext } from "@/contexts/FavoritesContext";
 import {
   DrawerContainer,
@@ -19,7 +19,7 @@ import { BusinessHoursList } from "./components/BusinessHoursList";
 import { ActionButtons } from "./components/ActionButtons";
 
 type Props = {
-  restaurant: RestaurantWithRelations | null;
+  restaurant: RestaurantData | null;
   onClose: () => void;
 };
 
@@ -105,7 +105,7 @@ function DangerLevelSection({ level }: { level: number }) {
   );
 }
 
-function TagsSection({ tags }: { tags: RestaurantWithRelations["tags"] }) {
+function TagsSection({ tags }: { tags: RestaurantData["tags"] }) {
   return (
     <FlexRow gap="md" wrap>
       {tags.map((tag) => (
