@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { frontendAuthService } from "@/services/frontend";
+import { setAuthCookieClient } from "@/lib/cookie";
 
 export function LoginForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,11 +17,10 @@ export function LoginForm() {
 
     try {
       const { token } = await frontendAuthService.login(email, password);
-      localStorage.setItem("auth_token", token);
-      router.push("/");
+      setAuthCookieClient(token);
+      window.location.href = "/";
     } catch (err) {
       setError(err instanceof Error ? err.message : "ログインに失敗しました");
-    } finally {
       setIsLoading(false);
     }
   };

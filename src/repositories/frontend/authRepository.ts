@@ -1,20 +1,14 @@
-export type UserData = {
-  id: string;
-  email: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
+import type { UserData, AuthResponse } from "@/lib/types";
+import { AuthError } from "@/lib/errors";
 
-export type AuthResponse = {
-  user: UserData;
-  token: string;
-};
+export { AuthError };
 
 export interface IFrontendAuthRepository {
   register(data: { email: string; password: string; name: string }): Promise<AuthResponse>;
   login(email: string, password: string): Promise<AuthResponse>;
-  getCurrentUser(token: string): Promise<UserData>;
+  logout(): Promise<void>;
+  updateProfile(data: { name: string }): Promise<UserData>;
+  changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }): Promise<void>;
 }
 
 export class FrontendAuthRepository implements IFrontendAuthRepository {
@@ -34,7 +28,7 @@ export class FrontendAuthRepository implements IFrontendAuthRepository {
     const result = await response.json();
 
     if (!response.ok) {
-      throw new Error(result.error || "登録に失敗しました");
+      throw new AuthError(result.error || "登録に失敗しました", response.status);
     }
 
     return { user: result.user, token: result.token };
@@ -50,26 +44,56 @@ export class FrontendAuthRepository implements IFrontendAuthRepository {
     const result = await response.json();
 
     if (!response.ok) {
-      throw new Error(result.error || "ログインに失敗しました");
+      throw new AuthError(result.error || "ログインに失敗しました", response.status);
     }
 
     return { user: result.user, token: result.token };
   }
 
-  async getCurrentUser(token: string): Promise<UserData> {
-    const response = await fetch(`${this.baseUrl}/user`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  async logout(): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      throw new AuthError(result.error || "ログアウトに失敗しました", response.status);
+    }
+  }
+
+  async updateProfile(data: { name: string }): Promise<UserData> {
+    const response = await fetch(`${this.baseUrl}/profile`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      credentials: "include",
     });
 
     const result = await response.json();
 
     if (!response.ok) {
-      throw new Error(result.error || "ユーザー情報の取得に失敗しました");
+      throw new AuthError(result.error || "プロフィールの更新に失敗しました", response.status);
     }
 
     return result.user;
+  }
+
+  async changePassword(
+    data: { currentPassword: string; newPassword: string; confirmPassword: string }
+  ): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/password`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      credentials: "include",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new AuthError(result.error || "パスワードの変更に失敗しました", response.status);
+    }
   }
 }
 

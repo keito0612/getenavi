@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { frontendAuthService } from "@/services/frontend";
+import { setAuthCookieClient } from "@/lib/cookie";
+import { useRouter } from "next/navigation";
+
 
 export function RegisterForm() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,11 +29,10 @@ export function RegisterForm() {
 
     try {
       const { token } = await frontendAuthService.register({ email, password, name });
-      localStorage.setItem("auth_token", token);
-      router.push("/");
+      setAuthCookieClient(token);
+      router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : "登録に失敗しました");
-    } finally {
       setIsLoading(false);
     }
   };

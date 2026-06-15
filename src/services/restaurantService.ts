@@ -1,19 +1,61 @@
+import { NextRequest, NextResponse } from "next/server";
 import { restaurantRepository, IRestaurantRepository } from "@/repositories/restaurantRepository";
-import type { RestaurantData, RestaurantQueryParams } from "@/lib/types";
+import { restaurantSearchSchema, restaurantIdParamSchema } from "@/lib/validations/restaurant";
+import { ApiResponse } from "@/lib/api";
 
 export class RestaurantService {
   constructor(private readonly repository: IRestaurantRepository) {}
 
-  async getRestaurants(params?: RestaurantQueryParams): Promise<RestaurantData[]> {
-    if (params?.bounds) {
-      const { north, south, east, west } = params.bounds;
-      return this.repository.getRestaurantsByBounds(north, south, east, west, params.query, params.tags);
+  async getRestaurants(request: NextRequest): Promise<NextResponse> {
+    try {
+      const { searchParams } = new URL(request.url);
+      const params = {
+        q: searchParams.get("q") ?? undefined,
+        tags: searchParams.get("tags") ?? undefined,
+        north: searchParams.get("north") ?? undefined,
+        south: searchParams.get("south") ?? undefined,
+        east: searchParams.get("east") ?? undefined,
+        west: searchParams.get("west") ?? undefined,
+      };
+
+      const result = restaurantSearchSchema.safeParse(params);
+      if (!result.success) {
+        return ApiResponse.validationError(result.error);
+      }
+
+      const { q: query, tags: tagsParam, north, south, east, west } = result.data;
+      const tags = tagsParam ? tagsParam.split(",") : undefined;
+
+      let restaurants;
+      if (north !== undefined && south !== undefined && east !== undefined && west !== undefined) {
+        restaurants = await this.repository.getRestaurantsByBounds(north, south, east, west, query, tags);
+      } else {
+        restaurants = await this.repository.getRestaurants(query, tags);
+      }
+
+      return ApiResponse.success({ restaurants });
+    } catch (error) {
+      console.error("Error fetching restaurants:", error);
+      return ApiResponse.serverError("レストランの取得に失敗しました");
     }
-    return this.repository.getRestaurants(params?.query, params?.tags);
   }
 
-  async getRestaurant(id: string): Promise<RestaurantData | null> {
-    return this.repository.getRestaurant(id);
+  async getRestaurant(id: string): Promise<NextResponse> {
+    const result = restaurantIdParamSchema.safeParse({ id });
+    if (!result.success) {
+      return ApiResponse.validationError(result.error);
+    }
+
+    try {
+      const restaurant = await this.repository.getRestaurant(result.data.id);
+      if (!restaurant) {
+        return ApiResponse.notFound("レストランが見つかりません");
+      }
+      return ApiResponse.success({ restaurant });
+    } catch (error) {
+      console.error("Error fetching restaurant:", error);
+      return ApiResponse.serverError("レストランの取得に失敗しました");
+    }
   }
 }
 

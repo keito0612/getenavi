@@ -14,7 +14,7 @@ const getSecretKey = () => {
 };
 
 const ALGORITHM = "HS256";
-const EXPIRATION_TIME = "7d";
+const EXPIRATION_TIME = "2d";
 
 export async function createToken(payload: { userId: string; email: string }): Promise<string> {
   return new SignJWT({ ...payload })

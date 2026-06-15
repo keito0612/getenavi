@@ -25,7 +25,7 @@ export class PasswordResetService {
       return false;
     }
 
-    await authService.resetPassword(validToken.userId, newPassword);
+    await authService.updatePassword(validToken.userId, newPassword);
     await this.resetRepository.markAsUsed(token);
 
     return true;

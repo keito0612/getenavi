@@ -1,15 +1,18 @@
+import { NextResponse } from "next/server";
 import { tagRepository, ITagRepository } from "@/repositories/tagRepository";
-import type { Tag } from "@prisma/client";
+import { ApiResponse } from "@/lib/api";
 
 export class TagService {
   constructor(private readonly repository: ITagRepository) {}
 
-  async getTags(): Promise<Tag[]> {
-    return this.repository.getTags();
-  }
-
-  async getTag(id: string): Promise<Tag | null> {
-    return this.repository.getTag(id);
+  async getTags(): Promise<NextResponse> {
+    try {
+      const tags = await this.repository.getTags();
+      return ApiResponse.success({ tags });
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+      return ApiResponse.serverError("タグの取得に失敗しました");
+    }
   }
 }
 

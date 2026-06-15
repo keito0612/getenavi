@@ -1,7 +1,6 @@
 import { RegisterForm } from "./RegisterForm";
 import { PageContainer, ContentContainer } from "@/components/ui/containers";
-import { Header, BackButton } from "@/components/ui";
-import Link from "next/link";
+import { Header, BackButton, TextLinkButton } from "@/components/ui";
 
 export default function RegisterPage() {
   return (
@@ -13,9 +12,7 @@ export default function RegisterPage() {
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>
               すでにアカウントをお持ちの方は
-              <Link href="/auth/login" className="text-orange-500 hover:underline ml-1">
-                ログイン
-              </Link>
+              <TextLinkButton href="/auth/login">ログイン</TextLinkButton>
             </p>
           </div>
         </div>

@@ -1,7 +1,6 @@
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { PageContainer, ContentContainer } from "@/components/ui/containers";
-import { Header, BackButton } from "@/components/ui";
-import Link from "next/link";
+import { Header, BackButton, TextLinkButton } from "@/components/ui";
 
 export default function ForgotPasswordPage() {
   return (
@@ -13,11 +12,9 @@ export default function ForgotPasswordPage() {
             登録したメールアドレスを入力してください。パスワード再設定用のリンクをお送りします。
           </p>
           <ForgotPasswordForm />
-          <div className="mt-6 text-center text-sm text-gray-600">
-            <Link href="/auth/login" className="text-orange-500 hover:underline">
-              ログインに戻る
-            </Link>
-          </div>
+          <TextLinkButton href="/auth/login" type="centered">
+            ログインに戻る
+          </TextLinkButton>
         </div>
       </ContentContainer>
     </PageContainer>

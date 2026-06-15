@@ -1,13 +1,12 @@
 import Link from "next/link";
-import { MenuIcon } from "@/components/ui";
 
 export function ListLink() {
   return (
     <Link
       href="/restaurants"
-      className="p-2 hover:bg-white/20 rounded-full transition-colors"
+      className="text-gray-300 hover:bg-gray-800 hover:text-white rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200"
     >
-      <MenuIcon />
+      店舗一覧
     </Link>
   );
 }

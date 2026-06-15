@@ -1,12 +1,11 @@
 import {
   frontendAuthRepository,
   type IFrontendAuthRepository,
-  type AuthResponse,
-  type UserData,
 } from "@/repositories/frontend/authRepository";
+import type { AuthResponse, UserData } from "@/lib/types";
 
 export class FrontendAuthService {
-  constructor(private readonly repository: IFrontendAuthRepository) {}
+  constructor(private readonly repository: IFrontendAuthRepository) { }
 
   async register(data: { email: string; password: string; name: string }): Promise<AuthResponse> {
     return this.repository.register(data);
@@ -16,8 +15,18 @@ export class FrontendAuthService {
     return this.repository.login(email, password);
   }
 
-  async getCurrentUser(token: string): Promise<UserData> {
-    return this.repository.getCurrentUser(token);
+  async logout(): Promise<void> {
+    return this.repository.logout();
+  }
+
+  async updateProfile(data: { name: string }): Promise<UserData> {
+    return this.repository.updateProfile(data);
+  }
+
+  async changePassword(
+    data: { currentPassword: string; newPassword: string; confirmPassword: string }
+  ): Promise<void> {
+    return this.repository.changePassword(data);
   }
 }
 

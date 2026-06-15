@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { restaurantService } from "@/services/restaurantService";
+import { restaurantRepository } from "@/repositories/restaurantRepository";
 import { RestaurantDetail } from "./RestaurantDetail";
 import Loading from "./loading";
 
@@ -10,7 +10,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const restaurant = await restaurantService.getRestaurant(id);
+  const restaurant = await restaurantRepository.getRestaurant(id);
 
   if (!restaurant) {
     return { title: "店舗が見つかりません - ゲテナビ" };
@@ -32,7 +32,7 @@ export default function RestaurantPage({ params }: Props) {
 
 async function RestaurantContent({ params }: Props) {
   const { id } = await params;
-  const restaurant = await restaurantService.getRestaurant(id);
+  const restaurant = await restaurantRepository.getRestaurant(id);
 
   if (!restaurant) {
     notFound();

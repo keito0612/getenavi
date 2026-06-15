@@ -1,34 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { authService } from "@/services/authService";
-import { registerSchema } from "@/lib/validations/auth";
+import { authRepository } from "@/repositories/authRepository";
+import { UtilAuth } from "@/lib/auth";
+import { EmailService } from "@/lib/email";
 import { createToken } from "@/lib/auth/jwt";
-
-export const runtime = "edge";
+import { registerSchema } from "@/lib/validations/auth";
+import { ApiResponse } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+  const body = await request.json();
 
-    const result = registerSchema.safeParse(body);
-    if (!result.success) {
-      const firstIssue = result.error.issues[0];
-      return NextResponse.json(
-        { error: firstIssue.message },
-        { status: 400 }
-      );
+  const result = registerSchema.safeParse(body);
+  if (!result.success) {
+    return ApiResponse.validationError(result.error);
+  }
+
+  try {
+    const existingUser = await authRepository.findByEmail(result.data.email);
+    if (existingUser) {
+      return ApiResponse.error("このメールアドレスは既に登録されています");
     }
 
-    const user = await authService.register(result.data);
+    const hashedPassword = await UtilAuth.hashPassword(result.data.password);
+    const user = await authRepository.createUser({
+      email: result.data.email,
+      password: hashedPassword,
+      name: result.data.name,
+    });
+
+    EmailService.sendWelcomeEmail(user.email, user.name).catch((error) => {
+      console.error("Failed to send welcome email:", error);
+    });
+
     const token = await createToken({ userId: user.id, email: user.email });
 
     return NextResponse.json({ user, token }, { status: 201 });
   } catch (error) {
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    return NextResponse.json(
-      { error: "登録に失敗しました" },
-      { status: 500 }
-    );
+    console.error("Error registering user:", error);
+    return ApiResponse.serverError();
   }
 }

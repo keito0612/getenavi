@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { tagService } from "@/services/tagService";
-import { restaurantService } from "@/services/restaurantService";
+import { tagRepository } from "@/repositories/tagRepository";
+import { restaurantRepository } from "@/repositories/restaurantRepository";
 import { HomeClient } from "./HomeClient";
 import { HeaderSkeleton, MapSkeleton } from "@/components/ui";
 
@@ -14,8 +14,8 @@ export default function Home() {
 
 async function HomeContent() {
   const [tags, restaurants] = await Promise.all([
-    tagService.getTags(),
-    restaurantService.getRestaurants(),
+    tagRepository.getTags(),
+    restaurantRepository.getRestaurants(),
   ]);
 
   return <HomeClient initialTags={tags} initialRestaurants={restaurants} />;

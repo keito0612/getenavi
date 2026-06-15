@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { restaurantService } from "@/services/restaurantService";
-import { tagService } from "@/services/tagService";
+import { restaurantRepository } from "@/repositories/restaurantRepository";
+import { tagRepository } from "@/repositories/tagRepository";
 import { RestaurantList } from "./RestaurantList";
 import Loading from "./loading";
 
@@ -19,8 +19,8 @@ export default function RestaurantsPage() {
 
 async function RestaurantsContent() {
   const [restaurants, tags] = await Promise.all([
-    restaurantService.getRestaurants(),
-    tagService.getTags(),
+    restaurantRepository.getRestaurants(),
+    tagRepository.getTags(),
   ]);
 
   return <RestaurantList initialRestaurants={restaurants} tags={tags} />;

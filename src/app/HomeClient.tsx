@@ -67,7 +67,7 @@ export function HomeClient({ initialTags, initialRestaurants }: Props) {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col pt-14 lg:pt-16">
       <HomeHeader />
 
       <TagFilter

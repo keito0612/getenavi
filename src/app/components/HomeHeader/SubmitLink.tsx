@@ -8,7 +8,7 @@ export function SubmitLink({ href = "https://forms.google.com" }: Props) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-sm bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full transition-colors"
+      className="text-gray-300 hover:bg-gray-800 hover:text-white rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200"
     >
       タレコミ
     </a>

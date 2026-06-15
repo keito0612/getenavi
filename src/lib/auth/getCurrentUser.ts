@@ -1,20 +1,43 @@
 import { headers } from "next/headers";
+import { verifyToken } from "@/lib/auth/jwt";
 import { userRepository } from "@/repositories/userRepository";
 import type { UserWithoutPassword } from "@/repositories/userRepository";
+import type { TokenPayload } from "@/lib/types";
 
 /**
- * サーバーサイドで現在のユーザーをDBから取得
- * Middlewareで設定されたヘッダーのuserIdを使用
+ * AuthorizationヘッダーからBearerトークンを取得してユーザー情報を返す
  */
 export async function getCurrentUser(): Promise<UserWithoutPassword | null> {
   const headersList = await headers();
-  const userId = headersList.get("x-user-id");
+  const authorization = headersList.get("authorization");
 
-  if (!userId) {
+  if (!authorization || !authorization.startsWith("Bearer ")) {
     return null;
   }
 
-  return userRepository.findById(userId);
+  const token = authorization.slice(7); // "Bearer " を除去
+  const payload = await verifyToken(token);
+
+  if (!payload) {
+    return null;
+  }
+
+  return userRepository.findById(payload.userId);
+}
+
+/**
+ * トークンのペイロードのみを返す（DB問い合わせなし）
+ */
+export async function getCurrentUserFromToken(): Promise<TokenPayload | null> {
+  const headersList = await headers();
+  const authorization = headersList.get("authorization");
+
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authorization.slice(7);
+  return verifyToken(token);
 }
 
 /**

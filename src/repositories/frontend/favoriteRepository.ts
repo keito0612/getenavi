@@ -1,9 +1,9 @@
 import type { RestaurantData } from "@/lib/types";
 
 export interface IFrontendFavoriteRepository {
-  getFavoriteRestaurants(token: string): Promise<RestaurantData[]>;
-  addFavorite(token: string, restaurantId: string): Promise<void>;
-  removeFavorite(token: string, restaurantId: string): Promise<void>;
+  getFavoriteRestaurants(): Promise<RestaurantData[]>;
+  addFavorite(restaurantId: string): Promise<void>;
+  removeFavorite(restaurantId: string): Promise<void>;
 }
 
 export class FrontendFavoriteRepository implements IFrontendFavoriteRepository {
@@ -13,16 +13,9 @@ export class FrontendFavoriteRepository implements IFrontendFavoriteRepository {
     this.baseUrl = baseUrl;
   }
 
-  private getAuthHeaders(token: string): HeadersInit {
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-  }
-
-  async getFavoriteRestaurants(token: string): Promise<RestaurantData[]> {
+  async getFavoriteRestaurants(): Promise<RestaurantData[]> {
     const response = await fetch(this.baseUrl, {
-      headers: this.getAuthHeaders(token),
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -34,11 +27,12 @@ export class FrontendFavoriteRepository implements IFrontendFavoriteRepository {
     return data.restaurants;
   }
 
-  async addFavorite(token: string, restaurantId: string): Promise<void> {
+  async addFavorite(restaurantId: string): Promise<void> {
     const response = await fetch(this.baseUrl, {
       method: "POST",
-      headers: this.getAuthHeaders(token),
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ restaurantId }),
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -47,13 +41,13 @@ export class FrontendFavoriteRepository implements IFrontendFavoriteRepository {
     }
   }
 
-  async removeFavorite(token: string, restaurantId: string): Promise<void> {
+  async removeFavorite(restaurantId: string): Promise<void> {
     const params = new URLSearchParams();
     params.set("restaurantId", restaurantId);
 
     const response = await fetch(`${this.baseUrl}?${params}`, {
       method: "DELETE",
-      headers: this.getAuthHeaders(token),
+      credentials: "include",
     });
 
     if (!response.ok) {

@@ -1,7 +1,6 @@
 import { LoginForm } from "./LoginForm";
 import { PageContainer, ContentContainer } from "@/components/ui/containers";
-import { Header, BackButton } from "@/components/ui";
-import Link from "next/link";
+import { Header, BackButton, TextLinkButton } from "@/components/ui";
 
 export default function LoginPage() {
   return (
@@ -13,14 +12,12 @@ export default function LoginPage() {
           <div className="mt-6 text-center text-sm text-gray-600 space-y-2">
             <p>
               アカウントをお持ちでない方は
-              <Link href="/auth/register" className="text-orange-500 hover:underline ml-1">
-                新規登録
-              </Link>
+              <TextLinkButton href="/auth/register">新規登録</TextLinkButton>
             </p>
             <p>
-              <Link href="/auth/forgot-password" className="text-orange-500 hover:underline">
+              <TextLinkButton href="/auth/forgot-password">
                 パスワードをお忘れの方
-              </Link>
+              </TextLinkButton>
             </p>
           </div>
         </div>

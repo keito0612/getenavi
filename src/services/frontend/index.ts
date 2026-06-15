@@ -18,3 +18,8 @@ export {
   FrontendAuthService,
   frontendAuthService,
 } from "./authService";
+
+export {
+  FrontendUserService,
+  frontendUserService,
+} from "./userService";

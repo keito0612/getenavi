@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { HeartIcon } from "@/components/ui";
 import { useFavoritesContext } from "@/contexts/FavoritesContext";
 
 export function FavoritesLink() {
@@ -10,13 +9,11 @@ export function FavoritesLink() {
   return (
     <Link
       href="/favorites"
-      className="relative p-2 hover:bg-white/20 rounded-full transition-colors"
+      className="text-gray-300 hover:bg-gray-800 hover:text-white rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200"
     >
-      <HeartIcon />
+      お気に入り
       {favorites.length > 0 && (
-        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-          {favorites.length}
-        </span>
+        <span className="ml-1 text-xs">({favorites.length})</span>
       )}
     </Link>
   );
