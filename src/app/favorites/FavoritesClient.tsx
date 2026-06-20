@@ -8,6 +8,7 @@ import { useFavoritesContext } from "@/contexts/FavoritesContext";
 import { PageContainer, ContentContainer, Stack } from "@/components/ui/containers";
 import { Header, BackButton, Spinner, EmptyState } from "@/components/ui";
 import { FavoriteCard } from "./components/FavoriteCard";
+import { HomeHeader } from "../components/HomeHeader";
 
 export function FavoritesClient() {
   const { favorites, isLoaded, removeFavorite } = useFavoritesContext();
@@ -42,8 +43,7 @@ export function FavoritesClient() {
 
   return (
     <PageContainer>
-      <Header title="お気に入り" left={<BackButton />} />
-
+      <HomeHeader />
       <ContentContainer>
         <FavoritesContent
           isLoading={isLoading}

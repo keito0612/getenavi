@@ -11,9 +11,10 @@ services:
       - SMTP_HOST=mailhog
       - SMTP_PORT=1025
       - MAIL_FROM=noreply@getenavi.local
+      - BETTER_AUTH_SECRET=ke6GI4Z5SE7da+EW4nyPY1Vd7AMovg/fzDoOgBxJs6c=
+      - BETTER_AUTH_URL=http://localhost:3000
     volumes:
       - .:/app
-      - /app/node_modules
     tty: true
     stdin_open: true
     command: sh -c "npm install && npx prisma generate && npm run dev"

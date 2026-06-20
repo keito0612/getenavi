@@ -29,8 +29,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="h-full">
-          <FavoritesProvider>{children}</FavoritesProvider>
-        </body>
+        <FavoritesProvider>{children}</FavoritesProvider>
+      </body>
     </html>
   );
 }

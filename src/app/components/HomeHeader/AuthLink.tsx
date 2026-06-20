@@ -1,26 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { frontendUserService } from "@/services/frontend";
+import { useAuth } from "@/hooks/useAuth";
 
 export function AuthLink() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-  const pathname = usePathname();
+  const { isAuthenticated, isPending } = useAuth();
 
-  useEffect(() => {
-    frontendUserService
-      .getCurrentUser()
-      .then(() => setIsLoggedIn(true))
-      .catch(() => setIsLoggedIn(false));
-  }, [pathname]);
-
-  if (isLoggedIn === null) {
+  if (isPending) {
     return <div className="w-16 h-8" />;
   }
 
-  if (isLoggedIn) {
+  if (isAuthenticated) {
     return (
       <Link
         href="/mypage"

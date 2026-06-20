@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getAuthCookieClient } from "@/lib/cookie";
-import { frontendUserService } from "@/services/frontend";
-import { UserData } from "@/lib/types";
+import { useAuth } from "@/hooks/useAuth";
 import HeaderLink from "./HeaderLink";
 
 const navigation = [
@@ -33,8 +30,8 @@ const HeaderLogo = () => {
   );
 };
 
-const HeaderUser = ({ user }: { user: UserData | null }) => {
-  if (!user) return null;
+const HeaderUser = ({ userName }: { userName?: string }) => {
+  if (!userName) return null;
 
   return (
     <Link
@@ -58,7 +55,6 @@ const HeaderUser = ({ user }: { user: UserData | null }) => {
   );
 }
 
-
 const Header = ({ children }: { children: React.ReactNode }) => {
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-amber-600 text-white px-4 py-3 shadow-md">
@@ -70,37 +66,29 @@ const Header = ({ children }: { children: React.ReactNode }) => {
 }
 
 export function HomeHeader() {
-  const [filteredNavigation, setFilteredNavigation] = useState(navigation);
-  const [user, setUser] = useState<UserData | null>(null);
-  const getUser = async () => {
-    try {
-      const user = await frontendUserService.getCurrentUser();
-      setUser(user);
-    } catch (e) {
-      setUser(null);
-    }
-  }
+  const { user, isAuthenticated, isPending } = useAuth();
 
-  useEffect(() => {
-    const token = getAuthCookieClient();
-    if (token) {
-      setFilteredNavigation(
-        navigation.filter(
-          (item) => item.name !== "ログイン" && item.name !== "新規登録"
-        )
-      );
-      getUser();
-    } else {
-      setFilteredNavigation(navigation);
-    }
-  }, []);
+  const filteredNavigation = isAuthenticated
+    ? navigation.filter((item) => item.name !== "ログイン" && item.name !== "新規登録")
+    : navigation;
+
+  if (isPending) {
+    return (
+      <Header>
+        <HeaderLogo />
+        <div className="flex items-center gap-3">
+          <HeaderNavigation navigations={[{ name: "検索", href: "/" }]} />
+        </div>
+      </Header>
+    );
+  }
 
   return (
     <Header>
       <HeaderLogo />
       <div className="flex items-center gap-3">
         <HeaderNavigation navigations={filteredNavigation} />
-        <HeaderUser user={user} />
+        <HeaderUser userName={user?.name} />
       </div>
     </Header>
   );

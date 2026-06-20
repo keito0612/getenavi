@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { frontendUserService } from "@/services/frontend";
-import { AuthError } from "@/lib/errors";
+import { useAuth } from "@/hooks/useAuth";
 import { HomeHeader } from "@/app/components/HomeHeader";
 import { ProfileSection } from "./components/ProfileSection";
 import { PasswordSection } from "./components/PasswordSection";
@@ -12,28 +11,24 @@ import type { UserData } from "@/lib/types";
 
 export function MyPageClient() {
   const router = useRouter();
-  const [user, setUser] = useState<UserData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user: authUser, isPending } = useAuth();
   const [activeTab, setActiveTab] = useState<"profile" | "password" | "favorites">("profile");
 
-  useEffect(() => {
-    frontendUserService
-      .getCurrentUser()
-      .then(setUser)
-      .catch((err) => {
-        console.error("Failed to get current user:", err);
-        if (err instanceof AuthError && err.status === 401) {
-          router.push("/auth/login");
-        }
-      })
-      .finally(() => setIsLoading(false));
-  }, [router]);
+  // 認証ユーザー情報からUserData形式に変換
+  const user: UserData | null = authUser ? {
+    id: authUser.id,
+    name: authUser.name,
+    email: authUser.email,
+    createdAt: new Date(authUser.createdAt),
+    updatedAt: new Date(authUser.updatedAt),
+  } : null;
 
-  const handleProfileUpdate = (updatedUser: UserData) => {
-    setUser(updatedUser);
+  const handleProfileUpdate = (_updatedUser: UserData) => {
+    // ページをリロードして最新の情報を取得
+    router.refresh();
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
@@ -42,6 +37,7 @@ export function MyPageClient() {
   }
 
   if (!user) {
+    router.push("/auth/login");
     return null;
   }
 

@@ -51,7 +51,7 @@ export function Map({ restaurants, onMarkerClick }: Props) {
         onGeolocate={handleGeolocate}
       />
 
-      {/* レストランマーカー */}
+      {/* 飲食店マーカー */}
       {restaurants.map((restaurant) => {
         const style = getDangerLevelStyle(restaurant.dangerLevel);
         return (

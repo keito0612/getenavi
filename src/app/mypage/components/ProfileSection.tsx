@@ -37,8 +37,8 @@ export function ProfileSection({ user, onUpdate }: Props) {
     setError("");
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ja-JP", {
+  const formatDate = (date: Date | string) => {
+    return new Date(date).toLocaleDateString("ja-JP", {
       year: "numeric",
       month: "long",
       day: "numeric",

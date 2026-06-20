@@ -1,27 +1,26 @@
 import { prisma } from "@/lib/prisma";
 import type { User } from "@prisma/client";
 
-export type UserWithoutPassword = Omit<User, "password">;
+export type UserPublic = Pick<User, "id" | "name" | "email" | "createdAt" | "updatedAt">;
 
 export interface IUserRepository {
-  findById(id: string): Promise<UserWithoutPassword | null>;
+  findById(id: string): Promise<UserPublic | null>;
 }
 
 export class UserRepository implements IUserRepository {
-  async findById(id: string): Promise<UserWithoutPassword | null> {
+  async findById(id: string): Promise<UserPublic | null> {
     const user = await prisma.user.findUnique({
       where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
-    if (!user) return null;
-
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return user;
   }
 }
 

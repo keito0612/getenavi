@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { restaurantRepository, IRestaurantRepository } from "@/repositories/restaurantRepository";
-import { restaurantSearchSchema, restaurantIdParamSchema } from "@/lib/validations/restaurant";
+import { restaurantSearchSchema } from "@/lib/validations/restaurant";
 import { ApiResponse } from "@/lib/api";
 
 export class RestaurantService {
-  constructor(private readonly repository: IRestaurantRepository) {}
+  constructor(private readonly repository: IRestaurantRepository) { }
 
   async getRestaurants(request: NextRequest): Promise<NextResponse> {
     try {
@@ -36,25 +36,20 @@ export class RestaurantService {
       return ApiResponse.success({ restaurants });
     } catch (error) {
       console.error("Error fetching restaurants:", error);
-      return ApiResponse.serverError("レストランの取得に失敗しました");
+      return ApiResponse.serverError("飲食店の取得に失敗しました");
     }
   }
 
   async getRestaurant(id: string): Promise<NextResponse> {
-    const result = restaurantIdParamSchema.safeParse({ id });
-    if (!result.success) {
-      return ApiResponse.validationError(result.error);
-    }
-
     try {
-      const restaurant = await this.repository.getRestaurant(result.data.id);
+      const restaurant = await this.repository.getRestaurant(id);
       if (!restaurant) {
-        return ApiResponse.notFound("レストランが見つかりません");
+        return ApiResponse.notFound("飲食店が見つかりません");
       }
       return ApiResponse.success({ restaurant });
     } catch (error) {
       console.error("Error fetching restaurant:", error);
-      return ApiResponse.serverError("レストランの取得に失敗しました");
+      return ApiResponse.serverError("飲食店の取得に失敗しました");
     }
   }
 }

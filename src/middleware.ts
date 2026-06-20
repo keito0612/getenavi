@@ -1,62 +1,31 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyToken } from "@/lib/auth/jwt";
 
-// 認証が必要なパス
-const PROTECTED_PATHS = [
-  "/api/favorites",
-  "/api/auth/user",
+// 認証が必要なAPIパス
+const PROTECTED_API_PATHS = [
   "/api/auth/profile",
   "/api/auth/password",
-  "/api/auth/logout",
+  "/api/favorites",
 ];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Cookieからトークンを取得
-  const token = request.cookies.get("auth_token")?.value;
+  // 認証が必要なAPIかチェック
+  const isProtectedApi = PROTECTED_API_PATHS.some((path) => pathname.startsWith(path));
 
-  // 保護されたパスでなければ、トークンがあればAuthorizationヘッダーを設定して通過
-  const isProtectedPath = PROTECTED_PATHS.some((path) => pathname.startsWith(path));
+  if (isProtectedApi) {
+    const authHeader = request.headers.get("Authorization");
 
-  if (!isProtectedPath) {
-    if (token) {
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set("authorization", `Bearer ${token}`);
-      return NextResponse.next({
-        request: { headers: requestHeaders },
-      });
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: "認証が必要です" },
+        { status: 401 }
+      );
     }
-    return NextResponse.next();
   }
 
-  // 保護されたパスの場合、トークンが必須
-  if (!token) {
-    return NextResponse.json(
-      { error: "認証が必要です" },
-      { status: 401 }
-    );
-  }
-
-  const payload = await verifyToken(token);
-
-  if (!payload) {
-    return NextResponse.json(
-      { error: "無効なトークンです" },
-      { status: 401 }
-    );
-  }
-
-  // Authorizationヘッダーを設定
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("authorization", `Bearer ${token}`);
-
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  return NextResponse.next();
 }
 
 export const config = {

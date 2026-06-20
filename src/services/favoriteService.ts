@@ -2,16 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { favoriteRepository, IFavoriteRepository } from "@/repositories/favoriteRepository";
 import { restaurantIdSchema } from "@/lib/validations/favorite";
 import { ApiResponse } from "@/lib/api";
+import { verifyBearerToken } from "@/lib/auth/verifyToken";
 
 export class FavoriteService {
   constructor(private readonly repository: IFavoriteRepository) {}
 
-  private getUserId(request: NextRequest): string | null {
-    return request.headers.get("x-user-id");
+  /**
+   * Bearer tokenからユーザーIDを取得
+   */
+  private async getUserIdFromToken(request: NextRequest): Promise<string | null> {
+    const result = await verifyBearerToken(request.headers);
+    return result?.userId ?? null;
   }
 
   async getFavorites(request: NextRequest): Promise<NextResponse> {
-    const userId = this.getUserId(request);
+    const userId = await this.getUserIdFromToken(request);
     if (!userId) {
       return ApiResponse.unauthorized();
     }
@@ -26,7 +31,7 @@ export class FavoriteService {
   }
 
   async addFavorite(request: NextRequest): Promise<NextResponse> {
-    const userId = this.getUserId(request);
+    const userId = await this.getUserIdFromToken(request);
     if (!userId) {
       return ApiResponse.unauthorized();
     }
@@ -47,7 +52,7 @@ export class FavoriteService {
   }
 
   async removeFavorite(request: NextRequest): Promise<NextResponse> {
-    const userId = this.getUserId(request);
+    const userId = await this.getUserIdFromToken(request);
     if (!userId) {
       return ApiResponse.unauthorized();
     }

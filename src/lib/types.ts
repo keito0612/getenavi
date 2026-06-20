@@ -1,11 +1,17 @@
-import type { Restaurant, Tag, BusinessHour, User } from "@prisma/client";
+import type { Restaurant, Tag, BusinessHour } from "@prisma/client";
 
 // ============================================
 // User types
 // ============================================
 
 /** フロントエンド用ユーザーデータ */
-export type UserData = Omit<User, 'password'>;
+export type UserData = {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 /** 認証レスポンス（ログイン・新規登録時） */
 export type AuthResponse = {
@@ -19,6 +25,18 @@ export type TokenPayload = {
   email: string;
   iat?: number;
   exp?: number;
+};
+
+// ============================================
+// UI types
+// ============================================
+
+/** モーダルの状態 */
+export type ModalState = {
+  isOpen: boolean;
+  type: "success" | "error";
+  title: string;
+  message?: string;
 };
 
 // ============================================

@@ -1,15 +1,15 @@
 import { NextRequest } from "next/server";
+import { verifyBearerToken } from "@/lib/auth/verifyToken";
 import { authService } from "@/services/authService";
 import { ApiResponse } from "@/lib/api";
 
-export const runtime = "edge";
-
 export async function PATCH(request: NextRequest) {
-  const userId = request.headers.get("x-user-id");
-  if (!userId) {
+  const result = await verifyBearerToken(request.headers);
+
+  if (!result) {
     return ApiResponse.unauthorized();
   }
 
   const body = await request.json();
-  return authService.changePassword(userId, body);
+  return authService.changePassword(result.userId, body);
 }

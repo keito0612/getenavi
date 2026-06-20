@@ -17,11 +17,4 @@ export const restaurantSearchSchema = z.object({
   { message: "地図範囲を指定する場合は、north, south, east, westすべてを指定してください" }
 );
 
-export const restaurantIdParamSchema = z.object({
-  id: z
-    .string({ error: "レストランIDは必須です" })
-    .uuid({ error: "有効なレストランIDを指定してください" }),
-});
-
 export type RestaurantSearchInput = z.infer<typeof restaurantSearchSchema>;
-export type RestaurantIdParamInput = z.infer<typeof restaurantIdParamSchema>;

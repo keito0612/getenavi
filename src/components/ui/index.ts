@@ -12,3 +12,4 @@ export * from "./LoadingOverlay";
 export * from "./containers";
 export * from "./skeletons";
 export * from "./TextLinkButton";
+export * from "./Modal";

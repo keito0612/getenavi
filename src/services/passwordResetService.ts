@@ -1,6 +1,6 @@
 import { passwordResetRepository, type IPasswordResetRepository } from "@/repositories/passwordResetRepository";
 import { authRepository, type IAuthRepository } from "@/repositories/authRepository";
-import { authService } from "@/services/authService";
+import { hash } from "bcryptjs";
 
 export class PasswordResetService {
   constructor(
@@ -25,7 +25,14 @@ export class PasswordResetService {
       return false;
     }
 
-    await authService.updatePassword(validToken.userId, newPassword);
+    // Better Authではパスワードはaccountsテーブルに保存される
+    const account = await this.authRepo.findAccountByUserId(validToken.userId, "credential");
+    if (!account) {
+      return false;
+    }
+
+    const hashedPassword = await hash(newPassword, 10);
+    await this.authRepo.updateAccountPassword(account.id, hashedPassword);
     await this.resetRepository.markAsUsed(token);
 
     return true;

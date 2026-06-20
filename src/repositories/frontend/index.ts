@@ -16,10 +16,4 @@ export {
   type IFrontendFavoriteRepository,
 } from "./favoriteRepository";
 
-export {
-  FrontendAuthRepository,
-  frontendAuthRepository,
-  type IFrontendAuthRepository,
-  type UserData,
-  type AuthResponse,
-} from "./authRepository";
+export type { UserData, AuthResponse } from "@/lib/types";

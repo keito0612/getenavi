@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { z, type ZodError } from "zod";
+import type { ZodError } from "zod";
 
 export class ApiResponse {
   static success<T>(data: T, status: number = 200) {
@@ -15,11 +15,31 @@ export class ApiResponse {
   }
 
   /**
+   * 特定フィールドのエラー
+   */
+  static fieldError(field: string, message: string, status: number = 400) {
+    return NextResponse.json(
+      { errors: { [field]: message } },
+      { status }
+    );
+  }
+
+  /**
    * Zodバリデーションエラー
+   * フィールド名をキーとしたエラーメッセージのオブジェクトを返す
    */
   static validationError(zodError: ZodError) {
+    const fieldErrors: Record<string, string> = {};
+
+    for (const issue of zodError.issues) {
+      const field = issue.path.join(".");
+      if (!fieldErrors[field]) {
+        fieldErrors[field] = issue.message;
+      }
+    }
+
     return NextResponse.json(
-      { errors: z.treeifyError(zodError) },
+      { errors: fieldErrors },
       { status: 400 }
     );
   }

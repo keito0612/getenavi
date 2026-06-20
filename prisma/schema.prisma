@@ -56,29 +56,80 @@ model BusinessHour {
   @@map("business_hours")
 }
 
-// 4. ユーザーテーブル
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String // ハッシュ化されたパスワード
-  name      String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+// ============================================
+// Better Auth モデル
+// ============================================
 
-  favoriteRestaurants  FavoriteRestaurant[]
-  passwordResetTokens  PasswordResetToken[]
+model User {
+  id            String    @id
+  email         String    @unique
+  emailVerified Boolean   @default(false) @map("email_verified")
+  name          String
+  image         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  sessions            Session[]
+  accounts            Account[]
+  favoriteRestaurants FavoriteRestaurant[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
 }
 
-// 5. パスワードリセットトークンテーブル
-model PasswordResetToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
+model Session {
+  id        String   @id
   userId    String   @map("user_id")
+  token     String   @unique
   expiresAt DateTime @map("expires_at")
-  usedAt    DateTime? @map("used_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id
+  userId                String    @map("user_id")
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("verifications")
+}
+
+// パスワードリセットトークン
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String    @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -86,7 +137,7 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
-// 6. お気に入りレストランテーブル（中間テーブル）
+// 6. お気に入り飲食店テーブル（中間テーブル）
 model FavoriteRestaurant {
   id           String   @id @default(uuid())
   userId       String   @map("user_id")

@@ -1,33 +1,39 @@
-import {
-  frontendAuthRepository,
-  type IFrontendAuthRepository,
-} from "@/repositories/frontend/authRepository";
-import type { AuthResponse, UserData } from "@/lib/types";
+import type { UserData } from "@/lib/types";
+import { AuthError } from "@/lib/errors";
+import { authFetch } from "@/lib/authFetch";
 
 export class FrontendAuthService {
-  constructor(private readonly repository: IFrontendAuthRepository) { }
-
-  async register(data: { email: string; password: string; name: string }): Promise<AuthResponse> {
-    return this.repository.register(data);
-  }
-
-  async login(email: string, password: string): Promise<AuthResponse> {
-    return this.repository.login(email, password);
-  }
-
-  async logout(): Promise<void> {
-    return this.repository.logout();
-  }
+  private baseUrl = "/api/auth";
 
   async updateProfile(data: { name: string }): Promise<UserData> {
-    return this.repository.updateProfile(data);
+    const response = await authFetch(`${this.baseUrl}/profile`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new AuthError(result.error || "プロフィールの更新に失敗しました", response.status);
+    }
+
+    return result.user;
   }
 
   async changePassword(
     data: { currentPassword: string; newPassword: string; confirmPassword: string }
   ): Promise<void> {
-    return this.repository.changePassword(data);
+    const response = await authFetch(`${this.baseUrl}/password`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new AuthError(result.error || "パスワードの変更に失敗しました", response.status);
+    }
   }
 }
 
-export const frontendAuthService = new FrontendAuthService(frontendAuthRepository);
+export const frontendAuthService = new FrontendAuthService();

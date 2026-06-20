@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import type { User } from "@prisma/client";
+import type { User, Account } from "@prisma/client";
 
-export type UserWithoutPassword = Omit<User, "password">;
+export type UserWithoutSensitive = Omit<User, "image" | "emailVerified">;
 
 export interface IAuthRepository {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
-  createUser(data: { email: string; password: string; name: string }): Promise<UserWithoutPassword>;
-  updateProfile(userId: string, data: { name: string }): Promise<UserWithoutPassword>;
-  updatePassword(userId: string, hashedPassword: string): Promise<void>;
+  findAccountByUserId(userId: string, providerId: string): Promise<Account | null>;
+  updateAccountPassword(accountId: string, hashedPassword: string): Promise<void>;
+  updateProfile(userId: string, data: { name: string }): Promise<UserWithoutSensitive>;
 }
 
 export class AuthRepository implements IAuthRepository {
@@ -24,21 +24,20 @@ export class AuthRepository implements IAuthRepository {
     });
   }
 
-  async createUser(data: { email: string; password: string; name: string }): Promise<UserWithoutPassword> {
-    const user = await prisma.user.create({
-      data,
+  async findAccountByUserId(userId: string, providerId: string): Promise<Account | null> {
+    return prisma.account.findFirst({
+      where: { userId, providerId },
     });
-
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
   }
 
-  async updateProfile(userId: string, data: { name: string }): Promise<UserWithoutPassword> {
+  async updateAccountPassword(accountId: string, hashedPassword: string): Promise<void> {
+    await prisma.account.update({
+      where: { id: accountId },
+      data: { password: hashedPassword },
+    });
+  }
+
+  async updateProfile(userId: string, data: { name: string }): Promise<UserWithoutSensitive> {
     const user = await prisma.user.update({
       where: { id: userId },
       data: { name: data.name },
@@ -51,13 +50,6 @@ export class AuthRepository implements IAuthRepository {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
-  }
-
-  async updatePassword(userId: string, hashedPassword: string): Promise<void> {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { password: hashedPassword },
-    });
   }
 }
 
