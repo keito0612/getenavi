@@ -27,9 +27,8 @@ export class FrontendFavoriteRepository implements IFrontendFavoriteRepository {
   }
 
   async addFavorite(restaurantId: string): Promise<void> {
-    const response = await authFetch(this.baseUrl, {
+    const response = await authFetch(`${this.baseUrl}/${restaurantId}`, {
       method: "POST",
-      body: JSON.stringify({ restaurantId }),
     });
 
     if (!response.ok) {
@@ -39,10 +38,7 @@ export class FrontendFavoriteRepository implements IFrontendFavoriteRepository {
   }
 
   async removeFavorite(restaurantId: string): Promise<void> {
-    const params = new URLSearchParams();
-    params.set("restaurantId", restaurantId);
-
-    const response = await authFetch(`${this.baseUrl}?${params}`, {
+    const response = await authFetch(`${this.baseUrl}/${restaurantId}`, {
       method: "DELETE",
     });
 
