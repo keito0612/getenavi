@@ -23,7 +23,7 @@ export class EmailService {
   /**
    * メール送信
    */
-  static async send(email: EmailTemplate): Promise<void> {
+  private static async send(email: EmailTemplate): Promise<void> {
     await transporter.sendMail({
       from: this.MAIL_FROM,
       to: email.to,

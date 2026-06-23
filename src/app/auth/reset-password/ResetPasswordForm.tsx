@@ -2,18 +2,26 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { resetPasswordFormSchema, type ResetPasswordFormInput } from "@/lib/validations/passwordReset";
 
 export function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ResetPasswordFormInput>({
+    resolver: zodResolver(resetPasswordFormSchema),
+  });
 
   if (!token) {
     return (
@@ -32,28 +40,20 @@ export function ResetPasswordForm() {
     );
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (password !== confirmPassword) {
-      setError("パスワードが一致しません");
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: ResetPasswordFormInput) => {
+    setServerError("");
 
     try {
       const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
+        body: JSON.stringify({ token, password: data.password }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "パスワードのリセットに失敗しました");
+        throw new Error(result.error || "パスワードのリセットに失敗しました");
       }
 
       setSuccess(true);
@@ -61,9 +61,7 @@ export function ResetPasswordForm() {
         router.push("/auth/login");
       }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "パスワードのリセットに失敗しました");
-    } finally {
-      setIsLoading(false);
+      setServerError(err instanceof Error ? err.message : "パスワードのリセットに失敗しました");
     }
   };
 
@@ -71,18 +69,21 @@ export function ResetPasswordForm() {
     return (
       <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
         <p className="font-medium">パスワードを変更しました</p>
-        <p className="text-sm mt-1">
-          ログインページにリダイレクトします...
-        </p>
+        <p className="text-sm mt-1">ログインページにリダイレクトします...</p>
       </div>
     );
   }
 
+  const inputClassName = (hasError: boolean) =>
+    `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+      hasError ? "border-red-500" : "border-gray-300"
+    }`;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {serverError && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-          {error}
+          {serverError}
         </div>
       )}
 
@@ -93,13 +94,13 @@ export function ResetPasswordForm() {
         <input
           id="password"
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          {...register("password")}
+          className={inputClassName(!!errors.password)}
           placeholder="8文字以上"
         />
+        {errors.password && (
+          <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+        )}
       </div>
 
       <div>
@@ -109,21 +110,21 @@ export function ResetPasswordForm() {
         <input
           id="confirmPassword"
           type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          minLength={8}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          {...register("confirmPassword")}
+          className={inputClassName(!!errors.confirmPassword)}
           placeholder="もう一度入力"
         />
+        {errors.confirmPassword && (
+          <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
+        )}
       </div>
 
       <button
         type="submit"
-        disabled={isLoading}
+        disabled={isSubmitting}
         className="w-full py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? "変更中..." : "パスワードを変更"}
+        {isSubmitting ? "変更中..." : "パスワードを変更"}
       </button>
     </form>
   );

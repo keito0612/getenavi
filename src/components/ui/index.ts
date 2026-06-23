@@ -8,6 +8,7 @@ export * from "./FavoriteButton";
 export * from "./DangerLevel";
 export * from "./TagBadge";
 export * from "./Thumbnail";
+export * from "./Loading";
 export * from "./LoadingOverlay";
 export * from "./containers";
 export * from "./skeletons";

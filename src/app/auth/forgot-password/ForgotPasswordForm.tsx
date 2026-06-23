@@ -1,36 +1,41 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations/passwordReset";
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
+
+  const onSubmit = async (data: ForgotPasswordInput) => {
+    setServerError("");
 
     try {
       const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(data),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "リクエストに失敗しました");
+        throw new Error(result.error || "リクエストに失敗しました");
       }
 
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "リクエストに失敗しました");
-    } finally {
-      setIsLoading(false);
+      setServerError(err instanceof Error ? err.message : "リクエストに失敗しました");
     }
   };
 
@@ -46,10 +51,10 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {serverError && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-          {error}
+          {serverError}
         </div>
       )}
 
@@ -60,20 +65,23 @@ export function ForgotPasswordForm() {
         <input
           id="email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          {...register("email")}
+          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+            errors.email ? "border-red-500" : "border-gray-300"
+          }`}
           placeholder="example@email.com"
         />
+        {errors.email && (
+          <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+        )}
       </div>
 
       <button
         type="submit"
-        disabled={isLoading}
+        disabled={isSubmitting}
         className="w-full py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? "送信中..." : "リセットリンクを送信"}
+        {isSubmitting ? "送信中..." : "リセットリンクを送信"}
       </button>
     </form>
   );

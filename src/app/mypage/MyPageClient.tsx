@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { Loading } from "@/components/ui";
 import { HomeHeader } from "@/app/components/HomeHeader";
 import { ProfileSection } from "./components/ProfileSection";
 import { PasswordSection } from "./components/PasswordSection";
@@ -29,11 +30,7 @@ export function MyPageClient() {
   };
 
   if (isPending) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
-      </div>
-    );
+    return <Loading text="読み込み中" />;
   }
 
   if (!user) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { Session, User } from "better-auth";
+import type { User } from "better-auth";
 
 const TOKEN_KEY = "auth_token";
 

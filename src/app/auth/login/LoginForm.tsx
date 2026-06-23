@@ -2,45 +2,36 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { signIn } from "@/hooks/useAuth";
 import { Modal } from "@/components/ui";
 import type { ModalState } from "@/lib/types";
-import type { FieldErrors } from "@/lib/errors";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const router = useRouter();
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
     type: "success",
     title: "",
   });
 
-  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+  });
 
-  const clearFieldError = (field: string) => {
-    setFieldErrors((prev) => {
-      const newErrors = { ...prev };
-      delete newErrors[field];
-      return newErrors;
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFieldErrors({});
-    setIsLoading(true);
-
-    const { error } = await signIn.email({
-      email,
-      password,
-    });
+  const onSubmit = async (data: LoginInput) => {
+    const { error } = await signIn.email(data);
 
     if (error) {
       if (error.code === "INVALID_EMAIL_OR_PASSWORD") {
-        setFieldErrors({ email: "メールアドレスまたはパスワードが正しくありません" });
+        setError("email", { message: "メールアドレスまたはパスワードが正しくありません" });
       } else {
         setModal({
           isOpen: true,
@@ -49,7 +40,6 @@ export function LoginForm() {
           message: error.message || "ログインに失敗しました",
         });
       }
-      setIsLoading(false);
       return;
     }
 
@@ -68,14 +58,14 @@ export function LoginForm() {
     }
   };
 
-  const inputClassName = (field: string) =>
+  const inputClassName = (hasError: boolean) =>
     `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-      fieldErrors[field] ? "border-red-500" : "border-gray-300"
+      hasError ? "border-red-500" : "border-gray-300"
     }`;
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             メールアドレス
@@ -83,17 +73,12 @@ export function LoginForm() {
           <input
             id="email"
             type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              clearFieldError("email");
-            }}
-            required
-            className={inputClassName("email")}
+            {...register("email")}
+            className={inputClassName(!!errors.email)}
             placeholder="example@email.com"
           />
-          {fieldErrors.email && (
-            <p className="mt-1 text-sm text-red-500">{fieldErrors.email}</p>
+          {errors.email && (
+            <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
           )}
         </div>
 
@@ -104,26 +89,21 @@ export function LoginForm() {
           <input
             id="password"
             type="password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              clearFieldError("password");
-            }}
-            required
-            className={inputClassName("password")}
+            {...register("password")}
+            className={inputClassName(!!errors.password)}
             placeholder="8文字以上"
           />
-          {fieldErrors.password && (
-            <p className="mt-1 text-sm text-red-500">{fieldErrors.password}</p>
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
           )}
         </div>
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isSubmitting}
           className="w-full py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? "ログイン中..." : "ログイン"}
+          {isSubmitting ? "ログイン中..." : "ログイン"}
         </button>
       </form>
 

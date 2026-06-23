@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { updateNameSchema, type UpdateNameInput } from "@/lib/validations/profile";
 import { frontendAuthService } from "@/services/frontend";
 import type { UserData } from "@/lib/types";
 
@@ -11,30 +14,34 @@ type Props = {
 
 export function ProfileSection({ user, onUpdate }: Props) {
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(user.name);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<UpdateNameInput>({
+    resolver: zodResolver(updateNameSchema),
+    defaultValues: { name: user.name },
+  });
+
+  const onSubmit = async (data: UpdateNameInput) => {
+    setServerError("");
 
     try {
-      const updatedUser = await frontendAuthService.updateProfile({ name });
+      const updatedUser = await frontendAuthService.updateProfile(data);
       onUpdate(updatedUser);
       setIsEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "更新に失敗しました");
-    } finally {
-      setIsLoading(false);
+      setServerError(err instanceof Error ? err.message : "更新に失敗しました");
     }
   };
 
   const handleCancel = () => {
-    setName(user.name);
+    reset({ name: user.name });
     setIsEditing(false);
-    setError("");
+    setServerError("");
   };
 
   const formatDate = (date: Date | string) => {
@@ -49,14 +56,14 @@ export function ProfileSection({ user, onUpdate }: Props) {
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-gray-800">プロフィール情報</h2>
 
-      {error && (
+      {serverError && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-          {error}
+          {serverError}
         </div>
       )}
 
       {isEditing ? (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
               お名前
@@ -64,20 +71,23 @@ export function ProfileSection({ user, onUpdate }: Props) {
             <input
               id="name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              {...register("name")}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                errors.name ? "border-red-500" : "border-gray-300"
+              }`}
             />
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+            )}
           </div>
 
           <div className="flex gap-3">
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-50"
             >
-              {isLoading ? "保存中..." : "保存"}
+              {isSubmitting ? "保存中..." : "保存"}
             </button>
             <button
               type="button"

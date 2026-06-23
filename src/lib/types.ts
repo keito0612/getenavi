@@ -1,4 +1,4 @@
-import type { Restaurant, Tag, BusinessHour } from "@prisma/client";
+import type { Restaurant, Tag, BusinessHour, Profile } from "@prisma/client";
 
 // ============================================
 // User types
@@ -25,6 +25,21 @@ export type TokenPayload = {
   email: string;
   iat?: number;
   exp?: number;
+};
+
+/** 認証検証結果 */
+export type AuthResult = {
+  userId: string;
+  user: UserData;
+} | null;
+
+// ============================================
+// Profile types
+// ============================================
+
+/** フロントエンド用プロフィールデータ（ユーザー情報含む） */
+export type ProfileData = Profile & {
+  user: Pick<UserData, "id" | "name" | "email">;
 };
 
 // ============================================

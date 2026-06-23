@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Loading } from "@/components/ui";
 import { frontendFavoriteService } from "@/services/frontend";
 import type { RestaurantData } from "@/lib/types";
 
@@ -30,11 +31,7 @@ export function FavoritesSection() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
-      </div>
-    );
+    return <Loading text="お気に入りを読み込み中" size="md" fullScreen={false} />;
   }
 
   return (

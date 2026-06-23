@@ -1,18 +1,9 @@
 import { auth } from "./better-auth";
-
-type AuthResult = {
-  userId: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-} | null;
+import type { AuthResult } from "@/lib/types";
 
 /**
- * Bearer tokenを検証してユーザー情報を取得
+ * 認証情報を検証してユーザー情報を取得
+ * Cookie認証とBearer token認証の両方に対応
  */
 export async function verifyBearerToken(headers: Headers): Promise<AuthResult> {
   const result = await auth.api.getSession({ headers });

@@ -2,54 +2,40 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 import { signUp } from "@/hooks/useAuth";
 import { Modal } from "@/components/ui";
 import type { ModalState } from "@/lib/types";
-import type { FieldErrors } from "@/lib/errors";
 
 export function RegisterForm() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const router = useRouter();
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
     type: "success",
     title: "",
   });
 
-  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+  });
 
-  const clearFieldError = (field: string) => {
-    setFieldErrors((prev) => {
-      const newErrors = { ...prev };
-      delete newErrors[field];
-      return newErrors;
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFieldErrors({});
-
-    if (password !== confirmPassword) {
-      setFieldErrors({ confirmPassword: "パスワードが一致しません" });
-      return;
-    }
-
-    setIsLoading(true);
-
+  const onSubmit = async (data: RegisterInput) => {
     const { error } = await signUp.email({
-      email,
-      password,
-      name,
+      email: data.email,
+      password: data.password,
+      name: data.name,
     });
 
     if (error) {
       if (error.code === "USER_ALREADY_EXISTS") {
-        setFieldErrors({ email: "このメールアドレスは既に登録されています" });
+        setError("email", { message: "このメールアドレスは既に登録されています" });
       } else {
         setModal({
           isOpen: true,
@@ -58,7 +44,6 @@ export function RegisterForm() {
           message: error.message || "登録に失敗しました",
         });
       }
-      setIsLoading(false);
       return;
     }
 
@@ -77,14 +62,14 @@ export function RegisterForm() {
     }
   };
 
-  const inputClassName = (field: string) =>
+  const inputClassName = (hasError: boolean) =>
     `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-      fieldErrors[field] ? "border-red-500" : "border-gray-300"
+      hasError ? "border-red-500" : "border-gray-300"
     }`;
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             お名前
@@ -92,17 +77,12 @@ export function RegisterForm() {
           <input
             id="name"
             type="text"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              clearFieldError("name");
-            }}
-            required
-            className={inputClassName("name")}
+            {...register("name")}
+            className={inputClassName(!!errors.name)}
             placeholder="山田 太郎"
           />
-          {fieldErrors.name && (
-            <p className="mt-1 text-sm text-red-500">{fieldErrors.name}</p>
+          {errors.name && (
+            <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
           )}
         </div>
 
@@ -113,17 +93,12 @@ export function RegisterForm() {
           <input
             id="email"
             type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              clearFieldError("email");
-            }}
-            required
-            className={inputClassName("email")}
+            {...register("email")}
+            className={inputClassName(!!errors.email)}
             placeholder="example@email.com"
           />
-          {fieldErrors.email && (
-            <p className="mt-1 text-sm text-red-500">{fieldErrors.email}</p>
+          {errors.email && (
+            <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
           )}
         </div>
 
@@ -134,18 +109,12 @@ export function RegisterForm() {
           <input
             id="password"
             type="password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              clearFieldError("password");
-            }}
-            required
-            minLength={8}
-            className={inputClassName("password")}
+            {...register("password")}
+            className={inputClassName(!!errors.password)}
             placeholder="8文字以上"
           />
-          {fieldErrors.password && (
-            <p className="mt-1 text-sm text-red-500">{fieldErrors.password}</p>
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
           )}
         </div>
 
@@ -156,27 +125,21 @@ export function RegisterForm() {
           <input
             id="confirmPassword"
             type="password"
-            value={confirmPassword}
-            onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              clearFieldError("confirmPassword");
-            }}
-            required
-            minLength={8}
-            className={inputClassName("confirmPassword")}
+            {...register("confirmPassword")}
+            className={inputClassName(!!errors.confirmPassword)}
             placeholder="もう一度入力"
           />
-          {fieldErrors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-500">{fieldErrors.confirmPassword}</p>
+          {errors.confirmPassword && (
+            <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
           )}
         </div>
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isSubmitting}
           className="w-full py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? "登録中..." : "登録する"}
+          {isSubmitting ? "登録中..." : "登録する"}
         </button>
       </form>
 

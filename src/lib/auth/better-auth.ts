@@ -15,14 +15,6 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
   },
-  user: {
-    additionalFields: {
-      name: {
-        type: "string",
-        required: true,
-      },
-    },
-  },
 });
 
 export type Session = typeof auth.$Infer.Session;

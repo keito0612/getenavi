@@ -73,8 +73,24 @@ model User {
   accounts            Account[]
   favoriteRestaurants FavoriteRestaurant[]
   passwordResetTokens PasswordResetToken[]
+  profile             Profile?
 
   @@map("users")
+}
+
+// プロフィールテーブル
+model Profile {
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  comment         String?  // 自己紹介
+  backgroundImage String?  @map("background_image") // 背景画像URL
+  avatarImage     String?  @map("avatar_image") // ユーザー画像URL
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
 }
 
 model Session {

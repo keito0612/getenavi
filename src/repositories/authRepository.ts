@@ -1,14 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import type { User, Account } from "@prisma/client";
-
-export type UserWithoutSensitive = Omit<User, "image" | "emailVerified">;
+import type { UserData } from "@/lib/types";
 
 export interface IAuthRepository {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   findAccountByUserId(userId: string, providerId: string): Promise<Account | null>;
   updateAccountPassword(accountId: string, hashedPassword: string): Promise<void>;
-  updateProfile(userId: string, data: { name: string }): Promise<UserWithoutSensitive>;
+  updateName(userId: string, name: string): Promise<UserData>;
 }
 
 export class AuthRepository implements IAuthRepository {
@@ -37,10 +36,10 @@ export class AuthRepository implements IAuthRepository {
     });
   }
 
-  async updateProfile(userId: string, data: { name: string }): Promise<UserWithoutSensitive> {
+  async updateName(userId: string, name: string): Promise<UserData> {
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name: data.name },
+      data: { name },
     });
 
     return {

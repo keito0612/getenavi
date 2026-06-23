@@ -1,21 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { authRepository, type IAuthRepository } from "@/repositories/authRepository";
 import { EmailService } from "@/services/emailService";
 import { forgotPasswordSchema, resetPasswordSchema } from "@/lib/validations/passwordReset";
-import { updateProfileSchema, changePasswordSchema } from "@/lib/validations/profile";
+import { updateNameSchema, changePasswordSchema } from "@/lib/validations/profile";
 import { ApiResponse } from "@/lib/api";
 import { passwordResetService } from "@/services/passwordResetService";
+import { verifyBearerToken } from "@/lib/auth/verifyToken";
 import { compare, hash } from "bcryptjs";
 
 export class AuthService {
-  constructor(private readonly repository: IAuthRepository) {}
+  constructor(private readonly repository: IAuthRepository) { }
 
-  async forgotPassword(body: unknown): Promise<NextResponse> {
-    const result = forgotPasswordSchema.safeParse(body);
-    if (!result.success) {
-      return ApiResponse.validationError(result.error);
-    }
+  async forgotPassword(request: NextRequest): Promise<NextResponse> {
     try {
+      const body = await request.json();
+      const result = forgotPasswordSchema.safeParse(body);
+      if (!result.success) {
+        return ApiResponse.validationError(result.error);
+      }
+
       const token = await passwordResetService.requestPasswordReset(result.data.email);
       if (token) {
         EmailService.sendPasswordResetEmail(result.data.email, token).catch((error) => {
@@ -31,12 +34,13 @@ export class AuthService {
     }
   }
 
-  async resetPassword(body: unknown): Promise<NextResponse> {
-    const result = resetPasswordSchema.safeParse(body);
-    if (!result.success) {
-      return ApiResponse.validationError(result.error);
-    }
+  async resetPassword(request: NextRequest): Promise<NextResponse> {
     try {
+      const body = await request.json();
+      const result = resetPasswordSchema.safeParse(body);
+      if (!result.success) {
+        return ApiResponse.validationError(result.error);
+      }
       const success = await passwordResetService.resetPassword(
         result.data.token,
         result.data.password
@@ -51,29 +55,41 @@ export class AuthService {
     }
   }
 
-  async updateProfile(userId: string, body: unknown): Promise<NextResponse> {
-    const result = updateProfileSchema.safeParse(body);
-    if (!result.success) {
-      return ApiResponse.validationError(result.error);
+  async updateName(request: NextRequest): Promise<NextResponse> {
+    const auth = await verifyBearerToken(request.headers);
+    if (!auth) {
+      return ApiResponse.unauthorized();
     }
 
     try {
-      const user = await this.repository.updateProfile(userId, { name: result.data.name });
+      const body = await request.json();
+      const result = updateNameSchema.safeParse(body);
+      if (!result.success) {
+        return ApiResponse.validationError(result.error);
+      }
+
+      const user = await this.repository.updateName(auth.userId, result.data.name);
       return ApiResponse.success({ user });
     } catch (error) {
-      console.error("Error updating profile:", error);
-      return ApiResponse.serverError("プロフィールの更新に失敗しました");
+      console.error("Error updating name:", error);
+      return ApiResponse.serverError("名前の更新に失敗しました");
     }
   }
 
-  async changePassword(userId: string, body: unknown): Promise<NextResponse> {
-    const result = changePasswordSchema.safeParse(body);
-    if (!result.success) {
-      return ApiResponse.validationError(result.error);
+  async changePassword(request: NextRequest): Promise<NextResponse> {
+    const auth = await verifyBearerToken(request.headers);
+    if (!auth) {
+      return ApiResponse.unauthorized();
     }
 
     try {
-      const account = await this.repository.findAccountByUserId(userId, "credential");
+      const body = await request.json();
+      const result = changePasswordSchema.safeParse(body);
+      if (!result.success) {
+        return ApiResponse.validationError(result.error);
+      }
+
+      const account = await this.repository.findAccountByUserId(auth.userId, "credential");
 
       if (!account?.password) {
         return ApiResponse.error("パスワードが設定されていません");
