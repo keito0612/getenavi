@@ -1,9 +1,9 @@
-import type { BusinessHour } from "@prisma/client";
+import type { BusinessHourData } from "@/lib/types";
 import { Section, CardContainer, FlexRow } from "@/components/ui/containers";
 import { DAY_OF_WEEK } from "@/lib/types";
 
 type Props = {
-  hours: BusinessHour[];
+  hours: BusinessHourData[];
 };
 
 export function BusinessHoursCard({ hours }: Props) {
@@ -18,7 +18,7 @@ export function BusinessHoursCard({ hours }: Props) {
   );
 }
 
-function HourRow({ hour }: { hour: BusinessHour }) {
+function HourRow({ hour }: { hour: BusinessHourData }) {
   const dayName = DAY_OF_WEEK[hour.dayOfWeek as keyof typeof DAY_OF_WEEK];
 
   return (

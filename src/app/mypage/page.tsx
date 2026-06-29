@@ -1,4 +1,4 @@
-import { MyPageClient } from "./MyPageClient";
+import { MyPageClient } from "./components/MyPageClient";
 
 export const metadata = {
   title: "マイページ - ゲテナビ",

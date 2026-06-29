@@ -3,7 +3,7 @@ import { Header, BackButton, Skeleton, SkeletonText } from "@/components/ui";
 
 export default function Loading() {
   return (
-    <PageContainer>
+    <PageContainer className="pt-14 lg:pt-16">
       <Header title="" left={<BackButton />} />
       <HeroSkeleton />
       <ContentContainer padding="lg">

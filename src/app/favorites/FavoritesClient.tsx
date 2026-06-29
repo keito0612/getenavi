@@ -3,52 +3,46 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { RestaurantData } from "@/lib/types";
-import { frontendRestaurantService } from "@/services/frontend";
-import { useFavoritesContext } from "@/contexts/FavoritesContext";
+import { frontendFavoriteService } from "@/services/frontend";
 import { PageContainer, ContentContainer, Stack } from "@/components/ui/containers";
-import { Header, BackButton, Spinner, EmptyState } from "@/components/ui";
+import { Spinner, EmptyState, Header } from "@/components/ui";
 import { FavoriteCard } from "./components/FavoriteCard";
-import { HomeHeader } from "../components/HomeHeader";
 
 export function FavoritesClient() {
-  const { favorites, isLoaded, removeFavorite } = useFavoritesContext();
   const [restaurants, setRestaurants] = useState<RestaurantData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoaded) return;
-
     const fetchFavorites = async () => {
-      if (favorites.length === 0) {
-        setRestaurants([]);
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        // TODO: 認証実装後はfrontendFavoriteService.getFavoriteRestaurants(userId)を使用
-        const results = await Promise.all(
-          favorites.map((id) => frontendRestaurantService.getRestaurant(id))
-        );
-        setRestaurants(results.filter((r): r is RestaurantData => r !== null));
+        const results = await frontendFavoriteService.getFavoriteRestaurants();
+        setRestaurants(results);
       } catch (error) {
         console.error("Failed to fetch favorites:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchFavorites();
-  }, [favorites, isLoaded]);
+  }, []);
+
+  const handleRemove = async (restaurantId: string) => {
+    try {
+      await frontendFavoriteService.removeFavorite(restaurantId);
+      setRestaurants((prev) => prev.filter((r) => r.id !== restaurantId));
+    } catch (error) {
+      console.error("Failed to remove favorite:", error);
+    }
+  };
 
   return (
-    <PageContainer>
-      <HomeHeader />
+    <PageContainer className="pt-14 lg:pt-16">
+      <Header />
       <ContentContainer>
         <FavoritesContent
           isLoading={isLoading}
           restaurants={restaurants}
-          onRemove={removeFavorite}
+          onRemove={handleRemove}
         />
       </ContentContainer>
     </PageContainer>

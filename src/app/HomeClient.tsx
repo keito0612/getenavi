@@ -2,11 +2,9 @@
 
 import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-import type { Tag } from "@prisma/client";
-import type { RestaurantData } from "@/lib/types";
+import type { TagData, RestaurantData } from "@/lib/types";
 import { frontendRestaurantService } from "@/services/frontend";
-import { LoadingOverlay, MapSkeleton } from "@/components/ui";
-import { HomeHeader } from "./components/HomeHeader";
+import { LoadingOverlay, MapSkeleton, Header } from "@/components/ui";
 import { TagFilter } from "./components/TagFilter";
 import { SearchBar } from "./components/SearchBar";
 import { RestaurantDrawer } from "./components/RestaurantDrawer";
@@ -18,7 +16,7 @@ const Map = dynamic(() => import("./components/Map").then((mod) => mod.Map), {
 });
 
 type Props = {
-  initialTags: Tag[];
+  initialTags: TagData[];
   initialRestaurants: RestaurantData[];
 };
 
@@ -68,7 +66,7 @@ export function HomeClient({ initialTags, initialRestaurants }: Props) {
 
   return (
     <div className="h-screen flex flex-col pt-14 lg:pt-16">
-      <HomeHeader />
+      <Header />
 
       <TagFilter
         tags={initialTags}

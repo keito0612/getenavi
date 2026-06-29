@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { Loading } from "@/components/ui";
-import { HomeHeader } from "@/app/components/HomeHeader";
+import { Loading, Header } from "@/components/ui";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { ProfileTabs } from "./components/ProfileTabs";
 import { PostsTab } from "./components/PostsTab";
@@ -26,7 +25,7 @@ export function ProfileClient() {
 
   return (
     <div className="min-h-screen bg-gray-900 pt-14 lg:pt-16">
-      <HomeHeader />
+      <Header />
 
       <main>
         <ProfileHeader

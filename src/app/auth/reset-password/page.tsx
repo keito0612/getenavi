@@ -5,7 +5,7 @@ import { Header, BackButton } from "@/components/ui";
 
 export default function ResetPasswordPage() {
   return (
-    <PageContainer>
+    <PageContainer className="pt-14 lg:pt-16">
       <Header title="新しいパスワードを設定" left={<BackButton />} />
       <ContentContainer>
         <div className="max-w-md mx-auto py-8">

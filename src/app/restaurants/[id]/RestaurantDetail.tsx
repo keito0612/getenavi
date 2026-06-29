@@ -20,6 +20,7 @@ import {
   LocationIcon,
 } from "@/components/ui";
 import { BusinessHoursCard } from "./components/BusinessHoursCard";
+import { ReviewSection } from "./components/ReviewSection";
 
 type Props = {
   restaurant: RestaurantData;
@@ -29,36 +30,31 @@ export function RestaurantDetail({ restaurant }: Props) {
   const { isFavorite, toggleFavorite } = useFavoritesContext();
 
   return (
-    <PageContainer>
+    <PageContainer className="pt-14 lg:pt-16">
       <Header
         title={restaurant.name}
         left={<BackButton />}
-        right={
-          <FavoriteButton
-            isFavorite={isFavorite(restaurant.id)}
-            onToggle={() => toggleFavorite(restaurant.id)}
-            variant="header"
-            size="lg"
-          />
-        }
       />
 
       <Thumbnail src={restaurant.imageUrl} alt={restaurant.name} size="hero" />
-
       <ContentContainer padding="lg">
         <Stack gap="lg">
-          <BasicInfo name={restaurant.name} address={restaurant.address} />
-
+          <FlexRow align="between">
+            <BasicInfo name={restaurant.name} address={restaurant.address} />
+            <FavoriteButton
+              isFavorite={isFavorite(restaurant.id)}
+              onToggle={() => toggleFavorite(restaurant.id)}
+              variant="header"
+              size="lg"
+            />
+          </FlexRow>
           <DangerLevel level={restaurant.dangerLevel} variant="card" />
-
           <TagsSection tags={restaurant.tags} />
-
           {restaurant.description && (
             <DescriptionSection description={restaurant.description} />
           )}
-
           <BusinessHoursCard hours={restaurant.businessHours} />
-
+          <ReviewSection restaurantId={restaurant.id} />
           <ActionButtons url={restaurant.url} restaurant={restaurant} />
         </Stack>
       </ContentContainer>

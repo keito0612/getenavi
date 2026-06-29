@@ -4,7 +4,7 @@ import { Header, BackButton, TextLinkButton } from "@/components/ui";
 
 export default function LoginPage() {
   return (
-    <PageContainer>
+    <PageContainer className="pt-14 lg:pt-16">
       <Header title="ログイン" left={<BackButton />} />
       <ContentContainer>
         <div className="max-w-md mx-auto py-8">

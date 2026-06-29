@@ -24,6 +24,7 @@ model Restaurant {
   tags                Tag[] // 暗黙的な多対多関係
   businessHours       BusinessHour[] // 一対多関係
   favoriteRestaurants FavoriteRestaurant[] // お気に入り関係
+  reviews             Review[] // レビュー関係
 
   @@index([latitude, longitude]) // マップ範囲検索高速化用
   @@map("restaurants")
@@ -74,6 +75,7 @@ model User {
   favoriteRestaurants FavoriteRestaurant[]
   passwordResetTokens PasswordResetToken[]
   profile             Profile?
+  reviews             Review[]
 
   @@map("users")
 }
@@ -166,4 +168,22 @@ model FavoriteRestaurant {
   @@unique([userId, restaurantId])
   @@index([userId])
   @@map("favorite_restaurants")
+}
+
+// 7. レビューテーブル
+model Review {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  restaurantId String   @map("restaurant_id")
+  rating       Int      // 1〜5の星評価
+  comment      String   // コメント（必須）
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, restaurantId]) // 1ユーザー1店舗につき1レビュー
+  @@index([restaurantId])
+  @@map("reviews")
 }

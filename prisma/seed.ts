@@ -9,10 +9,8 @@ const adapter = new PrismaBetterSqlite3({ url: dbPath });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("Seeding database...");
-
   // タグマスターの作成
-  const tags = await Promise.all([
+  await Promise.all([
     prisma.tag.upsert({
       where: { id: "wani" },
       update: {},
@@ -40,14 +38,9 @@ async function main() {
     }),
   ]);
 
-  console.log(`Created ${tags.length} tags`);
-
   // サンプル店舗データの作成
-  const restaurant1 = await prisma.restaurant.upsert({
-    where: { id: "sample-restaurant-1" },
-    update: {},
-    create: {
-      id: "sample-restaurant-1",
+  await prisma.restaurant.create({
+    data: {
       name: "珍食魔宮 新宿店",
       address: "東京都新宿区歌舞伎町1-XX-XX",
       latitude: 35.6938,
@@ -69,16 +62,11 @@ async function main() {
           { dayOfWeek: 0, openTime: null, closeTime: null, isClosed: true },
         ],
       },
-    },
+    }
   });
 
-  console.log(`Created restaurant: ${restaurant1.name}`);
-
-  const restaurant2 = await prisma.restaurant.upsert({
-    where: { id: "sample-restaurant-2" },
-    update: {},
-    create: {
-      id: "sample-restaurant-2",
+  await prisma.restaurant.create({
+    data: {
       name: "ジビエ酒場 渋谷",
       address: "東京都渋谷区道玄坂2-XX-XX",
       latitude: 35.658,
@@ -102,10 +90,6 @@ async function main() {
       },
     },
   });
-
-  console.log(`Created restaurant: ${restaurant2.name}`);
-
-  console.log("Seeding completed!");
 }
 
 main()

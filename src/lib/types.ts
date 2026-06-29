@@ -1,5 +1,3 @@
-import type { Restaurant, Tag, BusinessHour, Profile } from "@prisma/client";
-
 // ============================================
 // User types
 // ============================================
@@ -37,8 +35,15 @@ export type AuthResult = {
 // Profile types
 // ============================================
 
-/** フロントエンド用プロフィールデータ（ユーザー情報含む） */
-export type ProfileData = Profile & {
+/** フロントエンド用プロフィールデータ */
+export type ProfileData = {
+  id: string;
+  userId: string;
+  comment: string | null;
+  backgroundImage: string | null;
+  avatarImage: string | null;
+  createdAt: Date;
+  updatedAt: Date;
   user: Pick<UserData, "id" | "name" | "email">;
 };
 
@@ -55,13 +60,50 @@ export type ModalState = {
 };
 
 // ============================================
+// Tag types
+// ============================================
+
+/** タグデータ */
+export type TagData = {
+  id: string;
+  name: string;
+  emoji: string | null;
+  createdAt: Date;
+};
+
+// ============================================
+// BusinessHour types
+// ============================================
+
+/** 営業時間データ */
+export type BusinessHourData = {
+  id: string;
+  restaurantId: string;
+  dayOfWeek: number;
+  openTime: string | null;
+  closeTime: string | null;
+  isClosed: boolean;
+};
+
+// ============================================
 // Restaurant types
 // ============================================
 
 /** フロント側で使用する飲食店データ（タグ・営業時間を含む） */
-export type RestaurantData = Restaurant & {
-  tags: Tag[];
-  businessHours: BusinessHour[];
+export type RestaurantData = {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  url: string | null;
+  dangerLevel: number;
+  description: string | null;
+  imageUrl: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  tags: TagData[];
+  businessHours: BusinessHourData[];
 };
 
 /** 飲食店一覧レスポンス */
@@ -71,7 +113,7 @@ export type RestaurantListResponse = {
 
 /** タグ一覧レスポンス */
 export type TagListResponse = {
-  tags: Tag[];
+  tags: TagData[];
 };
 
 /** 飲食店検索パラメータ */
@@ -100,3 +142,38 @@ export const DAY_OF_WEEK = {
   5: "金曜日",
   6: "土曜日",
 } as const;
+
+// ============================================
+// Review types
+// ============================================
+
+/** レビューデータ */
+export type ReviewData = {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    name: string;
+    image?: string | null;
+  };
+};
+
+/** レビュー一覧レスポンス */
+export type ReviewListResponse = {
+  reviews: ReviewData[];
+};
+
+/** レビュー投稿リクエスト */
+export type CreateReviewInput = {
+  rating: number;
+  comment: string;
+};
+
+/** レビュー更新リクエスト */
+export type UpdateReviewInput = {
+  rating?: number;
+  comment?: string;
+};

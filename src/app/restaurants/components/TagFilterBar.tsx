@@ -1,7 +1,7 @@
-import type { Tag } from "@prisma/client";
+import type { TagData } from "@/lib/types";
 
 type Props = {
-  tags: Tag[];
+  tags: TagData[];
   selectedTags: string[];
   onTagToggle: (tagId: string) => void;
 };

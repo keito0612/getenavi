@@ -1,5 +1,6 @@
 import type { RestaurantData } from "@/lib/types";
 import { authFetch } from "@/lib/authFetch";
+import { UtilApi, ApiError } from "@/lib/utilApi";
 
 export interface IFrontendFavoriteRepository {
   getFavoriteRestaurants(): Promise<RestaurantData[]>;
@@ -8,18 +9,11 @@ export interface IFrontendFavoriteRepository {
 }
 
 export class FrontendFavoriteRepository implements IFrontendFavoriteRepository {
-  private baseUrl: string;
-
-  constructor(baseUrl: string = "/api/favorites") {
-    this.baseUrl = baseUrl;
-  }
-
   async getFavoriteRestaurants(): Promise<RestaurantData[]> {
-    const response = await authFetch(this.baseUrl);
+    const response = await authFetch(UtilApi.buildUrl("/api/favorites"));
 
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || "お気に入りの取得に失敗しました");
+      throw new ApiError("お気に入りの取得に失敗しました", response.status);
     }
 
     const data = await response.json();
@@ -27,24 +21,22 @@ export class FrontendFavoriteRepository implements IFrontendFavoriteRepository {
   }
 
   async addFavorite(restaurantId: string): Promise<void> {
-    const response = await authFetch(`${this.baseUrl}/${restaurantId}`, {
+    const response = await authFetch(UtilApi.buildUrl(`/api/favorites/${restaurantId}`), {
       method: "POST",
     });
 
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || "お気に入りの追加に失敗しました");
+      throw new ApiError("お気に入りの追加に失敗しました", response.status);
     }
   }
 
   async removeFavorite(restaurantId: string): Promise<void> {
-    const response = await authFetch(`${this.baseUrl}/${restaurantId}`, {
+    const response = await authFetch(UtilApi.buildUrl(`/api/favorites/${restaurantId}`), {
       method: "DELETE",
     });
 
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || "お気に入りの削除に失敗しました");
+      throw new ApiError("お気に入りの削除に失敗しました", response.status);
     }
   }
 }

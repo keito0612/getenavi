@@ -87,7 +87,7 @@ function HeaderSection({ name, address, isFavorite, onToggleFavorite, onClose }:
         <p className="text-sm text-gray-500 mt-1">{address}</p>
       </div>
       <FlexRow gap="sm">
-        <FavoriteButton isFavorite={isFavorite} onToggle={onToggleFavorite} />
+        <FavoriteButton isFavorite={isFavorite} size="lg" onToggle={onToggleFavorite} />
         <IconButton onClick={onClose}>
           <CloseIcon className="w-5 h-5 text-gray-500" />
         </IconButton>

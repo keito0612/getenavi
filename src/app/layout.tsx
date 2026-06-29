@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import "./globals.css";
 
@@ -30,6 +31,7 @@ export default function RootLayout({
     >
       <body className="h-full">
         <FavoritesProvider>{children}</FavoritesProvider>
+        <Toaster position="bottom-center" richColors />
       </body>
     </html>
   );

@@ -4,7 +4,7 @@ import { Header, BackButton, TextLinkButton } from "@/components/ui";
 
 export default function RegisterPage() {
   return (
-    <PageContainer>
+    <PageContainer className="pt-14 lg:pt-16">
       <Header title="新規登録" left={<BackButton />} />
       <ContentContainer>
         <div className="max-w-md mx-auto py-8">

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { Tag } from "@prisma/client";
-import type { RestaurantData } from "@/lib/types";
+import type { TagData, RestaurantData } from "@/lib/types";
 import { frontendRestaurantService } from "@/services/frontend";
 import { useFavoritesContext } from "@/contexts/FavoritesContext";
 import { PageContainer, ContentContainer, Stack } from "@/components/ui/containers";
@@ -10,10 +9,11 @@ import { Header, BackButton, Spinner, EmptyState } from "@/components/ui";
 import { SearchBar } from "./components/SearchBar";
 import { TagFilterBar } from "./components/TagFilterBar";
 import { RestaurantCard } from "./components/RestaurantCard";
+import { ApiError, UtilApi } from "@/lib/utilApi";
 
 type Props = {
   initialRestaurants: RestaurantData[];
-  tags: Tag[];
+  tags: TagData[];
 };
 
 export function RestaurantList({ initialRestaurants, tags }: Props) {
@@ -37,6 +37,11 @@ export function RestaurantList({ initialRestaurants, tags }: Props) {
       });
       setRestaurants(results);
     } catch (error) {
+      if (error instanceof ApiError) {
+        UtilApi.handleError(error, {
+          500: () => { },
+        });
+      }
       console.error("Failed to fetch restaurants:", error);
     } finally {
       setIsLoading(false);
@@ -50,7 +55,7 @@ export function RestaurantList({ initialRestaurants, tags }: Props) {
   );
 
   return (
-    <PageContainer>
+    <PageContainer className="pt-14 lg:pt-16">
       <Header title="店舗一覧" left={<BackButton />} />
 
       <ContentContainer>

@@ -18,7 +18,7 @@ const VARIANTS = {
 const SIZES = {
   sm: "w-4 h-4",
   md: "w-5 h-5",
-  lg: "w-6 h-6",
+  lg: "w-10 h-10",
 };
 
 export function FavoriteButton({ isFavorite, onToggle, variant = "default", size = "md" }: Props) {

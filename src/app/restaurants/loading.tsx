@@ -3,7 +3,7 @@ import { Header, BackButton, Skeleton, CardSkeleton } from "@/components/ui";
 
 export default function Loading() {
   return (
-    <PageContainer>
+    <PageContainer className="pt-14 lg:pt-16">
       <Header title="店舗一覧" left={<BackButton />} />
       <ContentContainer>
         <Stack>

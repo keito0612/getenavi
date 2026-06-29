@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { Loading } from "@/components/ui";
-import { HomeHeader } from "@/app/components/HomeHeader";
-import { ProfileSection } from "./components/ProfileSection";
-import { PasswordSection } from "./components/PasswordSection";
-import { FavoritesSection } from "./components/FavoritesSection";
+import { Loading, Header } from "@/components/ui";
+import { ProfileSection } from "./ProfileSection";
+import { PasswordSection } from "./PasswordSection";
+import { FavoritesSection } from "./FavoritesSection";
 import type { UserData } from "@/lib/types";
 
 export function MyPageClient() {
@@ -46,7 +45,7 @@ export function MyPageClient() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-14 lg:pt-16">
-      <HomeHeader />
+      <Header />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">マイページ</h1>
@@ -59,11 +58,10 @@ export function MyPageClient() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                    activeTab === tab.id
+                  className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
                       ? "border-orange-500 text-orange-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>

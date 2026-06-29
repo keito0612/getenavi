@@ -1,21 +1,16 @@
-import type { Tag } from "@prisma/client";
+import type { TagData } from "@/lib/types";
+import { UtilApi, ApiError } from "@/lib/utilApi";
 
 export interface IFrontendTagRepository {
-  getTags(): Promise<Tag[]>;
+  getTags(): Promise<TagData[]>;
 }
 
 export class FrontendTagRepository implements IFrontendTagRepository {
-  private baseUrl: string;
-
-  constructor(baseUrl: string = "/api/tags") {
-    this.baseUrl = baseUrl;
-  }
-
-  async getTags(): Promise<Tag[]> {
-    const response = await fetch(this.baseUrl);
+  async getTags(): Promise<TagData[]> {
+    const response = await fetch(UtilApi.buildUrl("/api/tags"));
 
     if (!response.ok) {
-      throw new Error("Failed to fetch tags");
+      throw new ApiError("タグ一覧の取得に失敗しました", response.status);
     }
 
     const data = await response.json();

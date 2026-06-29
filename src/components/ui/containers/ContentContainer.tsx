@@ -14,7 +14,7 @@ const PADDING = {
 
 export function ContentContainer({ children, padding = "md", className = "" }: Props) {
   return (
-    <main className={`max-w-2xl mx-auto ${PADDING[padding]} ${className}`}>
+    <main className={`max-w-7xl mx-auto ${PADDING[padding]} ${className}`}>
       {children}
     </main>
   );

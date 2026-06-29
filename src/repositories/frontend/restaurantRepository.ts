@@ -1,4 +1,5 @@
 import type { RestaurantData } from "@/lib/types";
+import { UtilApi, ApiError } from "@/lib/utilApi";
 
 export interface IFrontendRestaurantRepository {
   getRestaurants(params?: { query?: string; tags?: string[] }): Promise<RestaurantData[]>;
@@ -6,12 +7,6 @@ export interface IFrontendRestaurantRepository {
 }
 
 export class FrontendRestaurantRepository implements IFrontendRestaurantRepository {
-  private baseUrl: string;
-
-  constructor(baseUrl: string = "/api/restaurants") {
-    this.baseUrl = baseUrl;
-  }
-
   async getRestaurants(params?: { query?: string; tags?: string[] }): Promise<RestaurantData[]> {
     const searchParams = new URLSearchParams();
 
@@ -22,14 +17,13 @@ export class FrontendRestaurantRepository implements IFrontendRestaurantReposito
       searchParams.set("tags", params.tags.join(","));
     }
 
-    const url = searchParams.toString()
-      ? `${this.baseUrl}?${searchParams}`
-      : this.baseUrl;
+    const baseUrl = UtilApi.buildUrl("/api/restaurants");
+    const url = searchParams.toString() ? `${baseUrl}?${searchParams}` : baseUrl;
 
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch restaurants");
+      throw new ApiError("店舗一覧の取得に失敗しました", response.status);
     }
 
     const data = await response.json();
@@ -37,13 +31,13 @@ export class FrontendRestaurantRepository implements IFrontendRestaurantReposito
   }
 
   async getRestaurant(id: string): Promise<RestaurantData | null> {
-    const response = await fetch(`${this.baseUrl}/${id}`);
+    const response = await fetch(UtilApi.buildUrl(`/api/restaurants/${id}`));
 
     if (!response.ok) {
       if (response.status === 404) {
         return null;
       }
-      throw new Error("Failed to fetch restaurant");
+      throw new ApiError("店舗情報の取得に失敗しました", response.status);
     }
 
     const data = await response.json();
