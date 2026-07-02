@@ -15,12 +15,16 @@ export class FrontendReviewService {
     return this.repository.createReview(restaurantId, data);
   }
 
-  async updateReview(reviewId: string, data: UpdateReviewInput): Promise<ReviewData> {
-    return this.repository.updateReview(reviewId, data);
+  async updateReview(
+    restaurantId: string,
+    reviewId: string,
+    data: UpdateReviewInput
+  ): Promise<ReviewData> {
+    return this.repository.updateReview(restaurantId, reviewId, data);
   }
 
-  async deleteReview(reviewId: string): Promise<void> {
-    return this.repository.deleteReview(reviewId);
+  async deleteReview(restaurantId: string, reviewId: string): Promise<void> {
+    return this.repository.deleteReview(restaurantId, reviewId);
   }
 }
 

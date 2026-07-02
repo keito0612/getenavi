@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateNameSchema, type UpdateNameInput } from "@/lib/validations/profile";
 import { frontendAuthService } from "@/services/frontend";
+import { FormField } from "@/components/ui";
 import type { UserData } from "@/lib/types";
 
 type Props = {
@@ -64,22 +65,13 @@ export function ProfileSection({ user, onUpdate }: Props) {
 
       {isEditing ? (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              お名前
-            </label>
-            <input
-              id="name"
-              type="text"
-              {...register("name")}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.name ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-            )}
-          </div>
+          <FormField
+            id="name"
+            label="お名前"
+            type="text"
+            error={errors.name?.message}
+            {...register("name")}
+          />
 
           <div className="flex gap-3">
             <button

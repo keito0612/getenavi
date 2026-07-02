@@ -1,22 +1,63 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { toast } from "sonner";
 import { useAuth } from "./useAuth";
 import { frontendReviewService } from "@/services/frontend/reviewService";
-import { UtilApi } from "@/lib/utilApi";
-import type { ReviewData, CreateReviewInput, UpdateReviewInput } from "@/lib/types";
+import type { ReviewData } from "@/lib/types";
+
+// ============================================
+// 型定義
+// ============================================
+
+type CreateReviewData = {
+  rating: number;
+  comment: string;
+  images?: File[];
+};
+
+type UpdateReviewData = {
+  rating: number;
+  comment: string;
+  newImages?: File[];
+  existingImageUrls?: string[];
+};
+
+type MutationResult = {
+  success: boolean;
+  error?: string;
+};
 
 type UseReviewsReturn = {
+  // データ
   reviews: ReviewData[];
+  userReview: ReviewData | null;
   isLoading: boolean;
   error: Error | null;
-  userReview: ReviewData | null;
-  createReview: (data: CreateReviewInput) => Promise<boolean>;
-  updateReview: (reviewId: string, data: UpdateReviewInput) => Promise<boolean>;
-  deleteReview: (reviewId: string) => Promise<boolean>;
+  // 操作
+  createReview: (data: CreateReviewData) => Promise<MutationResult>;
+  updateReview: (reviewId: string, data: UpdateReviewData) => Promise<MutationResult>;
+  deleteReview: (reviewId: string) => Promise<MutationResult>;
   refetch: () => Promise<void>;
 };
+
+// ============================================
+// エラーメッセージマッピング
+// ============================================
+
+const ERROR_MESSAGES: Record<number, string> = {
+  401: "ログインが必要です",
+  403: "この操作を行う権限がありません",
+  404: "レビューが見つかりません",
+  409: "この店舗には既にレビューを投稿しています",
+};
+
+function getErrorMessage(status: number, defaultMessage: string): string {
+  return ERROR_MESSAGES[status] || defaultMessage;
+}
+
+// ============================================
+// useReviews
+// ============================================
 
 export function useReviews(restaurantId: string): UseReviewsReturn {
   const { user, isAuthenticated } = useAuth();
@@ -24,7 +65,38 @@ export function useReviews(restaurantId: string): UseReviewsReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchReviews = useCallback(async () => {
+  // レビュー一覧取得
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await frontendReviewService.getReviews(restaurantId);
+        if (isMounted) {
+          setReviews(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error("レビューの取得に失敗しました"));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [restaurantId]);
+
+  // 手動リフェッチ用
+  const refetch = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -37,78 +109,79 @@ export function useReviews(restaurantId: string): UseReviewsReturn {
     }
   }, [restaurantId]);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
-
-  // ログインユーザーのレビューを取得
+  // ログインユーザーのレビュー
   const userReview = isAuthenticated && user
     ? reviews.find((r) => r.user.id === user.id) ?? null
     : null;
 
+  // レビュー投稿
   const createReview = useCallback(
-    async (data: CreateReviewInput): Promise<boolean> => {
+    async (data: CreateReviewData): Promise<MutationResult> => {
       try {
         const newReview = await frontendReviewService.createReview(restaurantId, data);
         setReviews((prev) => [newReview, ...prev]);
-        toast.success("レビューを投稿しました");
-        return true;
+        return { success: true };
       } catch (err) {
-        UtilApi.handleError(err, {
-          401: () => toast.error("ログインが必要です"),
-          409: () => toast.error("この店舗には既にレビューを投稿しています"),
-        });
-        return false;
+        const status = (err as { status?: number }).status || 500;
+        return {
+          success: false,
+          error: getErrorMessage(status, "レビューの投稿に失敗しました"),
+        };
       }
     },
     [restaurantId]
   );
 
+  // レビュー更新
   const updateReview = useCallback(
-    async (reviewId: string, data: UpdateReviewInput): Promise<boolean> => {
+    async (reviewId: string, data: UpdateReviewData): Promise<MutationResult> => {
       try {
-        const updatedReview = await frontendReviewService.updateReview(reviewId, data);
+        const updatedReview = await frontendReviewService.updateReview(
+          restaurantId,
+          reviewId,
+          data
+        );
         setReviews((prev) =>
           prev.map((r) => (r.id === reviewId ? updatedReview : r))
         );
-        toast.success("レビューを更新しました");
-        return true;
+        return { success: true };
       } catch (err) {
-        UtilApi.handleError(err, {
-          401: () => toast.error("ログインが必要です"),
-          403: () => toast.error("このレビューを編集する権限がありません"),
-          404: () => toast.error("レビューが見つかりません"),
-        });
-        return false;
+        const status = (err as { status?: number }).status || 500;
+        return {
+          success: false,
+          error: getErrorMessage(status, "レビューの更新に失敗しました"),
+        };
       }
     },
-    []
+    [restaurantId]
   );
 
-  const deleteReview = useCallback(async (reviewId: string): Promise<boolean> => {
-    try {
-      await frontendReviewService.deleteReview(reviewId);
-      setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-      toast.success("レビューを削除しました");
-      return true;
-    } catch (err) {
-      UtilApi.handleError(err, {
-        401: () => toast.error("ログインが必要です"),
-        403: () => toast.error("このレビューを削除する権限がありません"),
-        404: () => toast.error("レビューが見つかりません"),
-      });
-      return false;
-    }
-  }, []);
+  // レビュー削除
+  const deleteReview = useCallback(
+    async (reviewId: string): Promise<MutationResult> => {
+      try {
+        await frontendReviewService.deleteReview(restaurantId, reviewId);
+        setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+        return { success: true };
+      } catch (err) {
+        const status = (err as { status?: number }).status || 500;
+        return {
+          success: false,
+          error: getErrorMessage(status, "レビューの削除に失敗しました"),
+        };
+      }
+    },
+    [restaurantId]
+  );
 
   return {
     reviews,
+    userReview,
     isLoading,
     error,
-    userReview,
     createReview,
     updateReview,
     deleteReview,
-    refetch: fetchReviews,
+    refetch,
   };
 }

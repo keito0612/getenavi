@@ -147,6 +147,13 @@ export const DAY_OF_WEEK = {
 // Review types
 // ============================================
 
+/** レビュー画像データ */
+export type ReviewImageData = {
+  id: string;
+  imageUrl: string;
+  order: number;
+};
+
 /** レビューデータ */
 export type ReviewData = {
   id: string;
@@ -154,11 +161,13 @@ export type ReviewData = {
   comment: string;
   createdAt: string;
   updatedAt: string;
+  timeAgo: string;
   user: {
     id: string;
     name: string;
     image?: string | null;
   };
+  images: ReviewImageData[];
 };
 
 /** レビュー一覧レスポンス */
@@ -170,10 +179,13 @@ export type ReviewListResponse = {
 export type CreateReviewInput = {
   rating: number;
   comment: string;
+  images?: File[];
 };
 
 /** レビュー更新リクエスト */
 export type UpdateReviewInput = {
-  rating?: number;
-  comment?: string;
+  rating: number;
+  comment: string;
+  newImages?: File[];
+  existingImageUrls?: string[];
 };

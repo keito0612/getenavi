@@ -1,27 +1,110 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { StarRating } from "./StarRating";
+import ImageUploader, { MAX_IMAGE_COUNT, MAX_FILE_SIZE } from "@/components/ui/ImageUploader";
+
+type CreateSubmitData = {
+  rating: number;
+  comment: string;
+  images?: File[];
+};
+
+type UpdateSubmitData = {
+  rating: number;
+  comment: string;
+  newImages?: File[];
+  existingImageUrls?: string[];
+};
+
+type ExistingImage = {
+  id: number;
+  url: string;
+};
 
 type Props = {
   initialRating?: number;
   initialComment?: string;
-  onSubmit: (data: { rating: number; comment: string }) => Promise<boolean>;
+  initialImages?: string[];
+  onSubmit: (data: CreateSubmitData | UpdateSubmitData) => Promise<boolean>;
   onCancel?: () => void;
   submitLabel?: string;
+  isEditMode?: boolean;
 };
 
 export function ReviewForm({
   initialRating = 0,
   initialComment = "",
+  initialImages = [],
   onSubmit,
   onCancel,
   submitLabel = "投稿する",
+  isEditMode = false,
 }: Props) {
   const [rating, setRating] = useState(initialRating);
   const [comment, setComment] = useState(initialComment);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviewImages, setNewPreviewImages] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<ExistingImage[]>(
+    initialImages.map((url, index) => ({ id: index, url }))
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ rating?: string; comment?: string }>({});
+  const [errors, setErrors] = useState<{ rating?: string; comment?: string; image?: string }>({});
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const currentTotal = existingImages.length + newFiles.length;
+    const remainingSlots = MAX_IMAGE_COUNT - currentTotal;
+
+    if (remainingSlots <= 0) {
+      setErrors((prev) => ({ ...prev, image: `画像は最大${MAX_IMAGE_COUNT}枚までです` }));
+      return;
+    }
+
+    const validFiles: File[] = [];
+    const newPreviews: string[] = [];
+
+    for (let i = 0; i < Math.min(files.length, remainingSlots); i++) {
+      const file = files[i];
+
+      if (file.size > MAX_FILE_SIZE) {
+        setErrors((prev) => ({ ...prev, image: "ファイルサイズは5MB以下にしてください" }));
+        continue;
+      }
+
+      if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
+        setErrors((prev) => ({ ...prev, image: "JPEG、PNG形式の画像のみアップロードできます" }));
+        continue;
+      }
+
+      validFiles.push(file);
+      newPreviews.push(URL.createObjectURL(file));
+    }
+
+    if (validFiles.length > 0) {
+      setNewFiles((prev) => [...prev, ...validFiles]);
+      setNewPreviewImages((prev) => [...prev, ...newPreviews]);
+      setErrors((prev) => ({ ...prev, image: undefined }));
+    }
+
+    // Reset input
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  }, [existingImages.length, newFiles.length]);
+
+  const handleRemoveExistingImage = useCallback((index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleRemoveNewImage = useCallback((index: number) => {
+    URL.revokeObjectURL(newPreviewImages[index]);
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewPreviewImages((prev) => prev.filter((_, i) => i !== index));
+  }, [newPreviewImages]);
 
   const validate = (): boolean => {
     const newErrors: { rating?: string; comment?: string } = {};
@@ -46,12 +129,33 @@ export function ReviewForm({
     if (!validate()) return;
 
     setIsSubmitting(true);
-    const success = await onSubmit({ rating, comment });
+
+    let success: boolean;
+    if (isEditMode) {
+      success = await onSubmit({
+        rating,
+        comment,
+        newImages: newFiles,
+        existingImageUrls: existingImages.map((img) => img.url),
+      });
+    } else {
+      success = await onSubmit({
+        rating,
+        comment,
+        images: newFiles,
+      });
+    }
+
     setIsSubmitting(false);
 
     if (success) {
+      // Cleanup preview URLs
+      newPreviewImages.forEach((url) => URL.revokeObjectURL(url));
       setRating(0);
       setComment("");
+      setNewFiles([]);
+      setNewPreviewImages([]);
+      setExistingImages([]);
       setErrors({});
     }
   };
@@ -94,6 +198,16 @@ export function ReviewForm({
           </span>
         </div>
       </div>
+
+      <ImageUploader
+        inputRef={inputRef}
+        existingImages={existingImages}
+        newPreviewImages={newPreviewImages}
+        onImageSelect={handleImageSelect}
+        onRemoveExistingImage={handleRemoveExistingImage}
+        onRemoveNewImage={handleRemoveNewImage}
+        errorMessage={errors.image}
+      />
 
       <div className="flex gap-2 justify-end">
         {onCancel && (

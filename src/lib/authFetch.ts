@@ -22,7 +22,9 @@ export async function authFetch(
     }
   }
 
-  if (!headers.has("Content-Type") && fetchOptions.body) {
+  // FormDataの場合はContent-Typeを設定しない（ブラウザが自動設定）
+  const isFormData = fetchOptions.body instanceof FormData;
+  if (!headers.has("Content-Type") && fetchOptions.body && !isFormData) {
     headers.set("Content-Type", "application/json");
   }
 

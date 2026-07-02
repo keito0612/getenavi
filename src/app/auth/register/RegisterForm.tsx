@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 import { signUp } from "@/hooks/useAuth";
-import { Modal } from "@/components/ui";
+import { Modal, FormField } from "@/components/ui";
 import type { ModalState } from "@/lib/types";
 
 export function RegisterForm() {
@@ -62,77 +62,44 @@ export function RegisterForm() {
     }
   };
 
-  const inputClassName = (hasError: boolean) =>
-    `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-      hasError ? "border-red-500" : "border-gray-300"
-    }`;
-
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            お名前
-          </label>
-          <input
-            id="name"
-            type="text"
-            {...register("name")}
-            className={inputClassName(!!errors.name)}
-            placeholder="山田 太郎"
-          />
-          {errors.name && (
-            <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-          )}
-        </div>
+        <FormField
+          id="name"
+          label="お名前"
+          type="text"
+          placeholder="山田 太郎"
+          error={errors.name?.message}
+          {...register("name")}
+        />
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            メールアドレス
-          </label>
-          <input
-            id="email"
-            type="email"
-            {...register("email")}
-            className={inputClassName(!!errors.email)}
-            placeholder="example@email.com"
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-          )}
-        </div>
+        <FormField
+          id="email"
+          label="メールアドレス"
+          type="email"
+          placeholder="example@email.com"
+          error={errors.email?.message}
+          {...register("email")}
+        />
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            パスワード
-          </label>
-          <input
-            id="password"
-            type="password"
-            {...register("password")}
-            className={inputClassName(!!errors.password)}
-            placeholder="8文字以上"
-          />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-          )}
-        </div>
+        <FormField
+          id="password"
+          label="パスワード"
+          type="password"
+          placeholder="8文字以上"
+          error={errors.password?.message}
+          {...register("password")}
+        />
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-            パスワード（確認）
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            {...register("confirmPassword")}
-            className={inputClassName(!!errors.confirmPassword)}
-            placeholder="もう一度入力"
-          />
-          {errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
-          )}
-        </div>
+        <FormField
+          id="confirmPassword"
+          label="パスワード（確認）"
+          type="password"
+          placeholder="もう一度入力"
+          error={errors.confirmPassword?.message}
+          {...register("confirmPassword")}
+        />
 
         <button
           type="submit"

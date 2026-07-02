@@ -24,14 +24,16 @@ export class UtilApi {
   }
   static handleError(
     error: unknown,
-    handlers: Partial<Record<number, () => void>>
+    handlers: Partial<Record<number | "default", () => void>>
   ): void {
     const err = error as ApiError;
     const status = err.status || 500;
 
-    // 対応するハンドラーがあれば実行
+    // 対応するハンドラーがあれば実行、なければdefault
     if (handlers[status]) {
       handlers[status]();
+    } else if (handlers.default) {
+      handlers.default();
     }
   }
 }

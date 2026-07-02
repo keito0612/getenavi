@@ -5,8 +5,8 @@ import { UtilApi, ApiError } from "@/lib/utilApi";
 export interface IFrontendReviewRepository {
   getReviews(restaurantId: string): Promise<ReviewData[]>;
   createReview(restaurantId: string, data: CreateReviewInput): Promise<ReviewData>;
-  updateReview(reviewId: string, data: UpdateReviewInput): Promise<ReviewData>;
-  deleteReview(reviewId: string): Promise<void>;
+  updateReview(restaurantId: string, reviewId: string, data: UpdateReviewInput): Promise<ReviewData>;
+  deleteReview(restaurantId: string, reviewId: string): Promise<void>;
 }
 
 export class FrontendReviewRepository implements IFrontendReviewRepository {
@@ -24,11 +24,21 @@ export class FrontendReviewRepository implements IFrontendReviewRepository {
   }
 
   async createReview(restaurantId: string, data: CreateReviewInput): Promise<ReviewData> {
+    const formData = new FormData();
+    formData.append("rating", String(data.rating));
+    formData.append("comment", data.comment);
+
+    if (data.images) {
+      for (const image of data.images) {
+        formData.append("images", image);
+      }
+    }
+
     const response = await authFetch(
       UtilApi.buildUrl(`/api/restaurants/${restaurantId}/reviews`),
       {
         method: "POST",
-        body: JSON.stringify(data),
+        body: formData,
       }
     );
 
@@ -47,12 +57,31 @@ export class FrontendReviewRepository implements IFrontendReviewRepository {
     return result.review;
   }
 
-  async updateReview(reviewId: string, data: UpdateReviewInput): Promise<ReviewData> {
+  async updateReview(
+    restaurantId: string,
+    reviewId: string,
+    data: UpdateReviewInput
+  ): Promise<ReviewData> {
+    const formData = new FormData();
+    formData.append("rating", String(data.rating));
+    formData.append("comment", data.comment);
+
+    if (data.existingImageUrls) {
+      for (const url of data.existingImageUrls) {
+        formData.append("existingImageUrls", url);
+      }
+    }
+    if (data.newImages) {
+      for (const image of data.newImages) {
+        formData.append("images", image);
+      }
+    }
+
     const response = await authFetch(
-      UtilApi.buildUrl(`/api/reviews/${reviewId}`),
+      UtilApi.buildUrl(`/api/restaurants/${restaurantId}/reviews/${reviewId}`),
       {
         method: "PATCH",
-        body: JSON.stringify(data),
+        body: formData,
       }
     );
 
@@ -68,9 +97,9 @@ export class FrontendReviewRepository implements IFrontendReviewRepository {
     return result.review;
   }
 
-  async deleteReview(reviewId: string): Promise<void> {
+  async deleteReview(restaurantId: string, reviewId: string): Promise<void> {
     const response = await authFetch(
-      UtilApi.buildUrl(`/api/reviews/${reviewId}`),
+      UtilApi.buildUrl(`/api/restaurants/${restaurantId}/reviews/${reviewId}`),
       {
         method: "DELETE",
       }

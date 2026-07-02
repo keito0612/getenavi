@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { signIn } from "@/hooks/useAuth";
-import { Modal } from "@/components/ui";
+import { Modal, FormField } from "@/components/ui";
 import type { ModalState } from "@/lib/types";
 
 export function LoginForm() {
@@ -58,45 +58,26 @@ export function LoginForm() {
     }
   };
 
-  const inputClassName = (hasError: boolean) =>
-    `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-      hasError ? "border-red-500" : "border-gray-300"
-    }`;
-
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            メールアドレス
-          </label>
-          <input
-            id="email"
-            type="email"
-            {...register("email")}
-            className={inputClassName(!!errors.email)}
-            placeholder="example@email.com"
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-          )}
-        </div>
+        <FormField
+          id="email"
+          label="メールアドレス"
+          type="email"
+          placeholder="example@email.com"
+          error={errors.email?.message}
+          {...register("email")}
+        />
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            パスワード
-          </label>
-          <input
-            id="password"
-            type="password"
-            {...register("password")}
-            className={inputClassName(!!errors.password)}
-            placeholder="8文字以上"
-          />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-          )}
-        </div>
+        <FormField
+          id="password"
+          label="パスワード"
+          type="password"
+          placeholder="8文字以上"
+          error={errors.password?.message}
+          {...register("password")}
+        />
 
         <button
           type="submit"

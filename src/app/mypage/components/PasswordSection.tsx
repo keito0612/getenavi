@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { changePasswordSchema, type ChangePasswordInput } from "@/lib/validations/profile";
 import { frontendAuthService } from "@/services/frontend";
+import { FormField } from "@/components/ui";
 
 export function PasswordSection() {
   const [serverError, setServerError] = useState("");
@@ -32,11 +33,6 @@ export function PasswordSection() {
     }
   };
 
-  const inputClassName = (hasError: boolean) =>
-    `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-      hasError ? "border-red-500" : "border-gray-300"
-    }`;
-
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-gray-800">パスワード変更</h2>
@@ -54,51 +50,30 @@ export function PasswordSection() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-md">
-        <div>
-          <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-            現在のパスワード
-          </label>
-          <input
-            id="currentPassword"
-            type="password"
-            {...register("currentPassword")}
-            className={inputClassName(!!errors.currentPassword)}
-          />
-          {errors.currentPassword && (
-            <p className="mt-1 text-sm text-red-500">{errors.currentPassword.message}</p>
-          )}
-        </div>
+        <FormField
+          id="currentPassword"
+          label="現在のパスワード"
+          type="password"
+          error={errors.currentPassword?.message}
+          {...register("currentPassword")}
+        />
 
-        <div>
-          <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-            新しいパスワード
-          </label>
-          <input
-            id="newPassword"
-            type="password"
-            {...register("newPassword")}
-            className={inputClassName(!!errors.newPassword)}
-            placeholder="8文字以上"
-          />
-          {errors.newPassword && (
-            <p className="mt-1 text-sm text-red-500">{errors.newPassword.message}</p>
-          )}
-        </div>
+        <FormField
+          id="newPassword"
+          label="新しいパスワード"
+          type="password"
+          placeholder="8文字以上"
+          error={errors.newPassword?.message}
+          {...register("newPassword")}
+        />
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-            新しいパスワード（確認）
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            {...register("confirmPassword")}
-            className={inputClassName(!!errors.confirmPassword)}
-          />
-          {errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
-          )}
-        </div>
+        <FormField
+          id="confirmPassword"
+          label="新しいパスワード（確認）"
+          type="password"
+          error={errors.confirmPassword?.message}
+          {...register("confirmPassword")}
+        />
 
         <button
           type="submit"

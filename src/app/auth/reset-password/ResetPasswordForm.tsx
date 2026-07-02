@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { resetPasswordFormSchema, type ResetPasswordFormInput } from "@/lib/validations/passwordReset";
+import { FormField } from "@/components/ui";
 
 export function ResetPasswordForm() {
   const router = useRouter();
@@ -74,11 +75,6 @@ export function ResetPasswordForm() {
     );
   }
 
-  const inputClassName = (hasError: boolean) =>
-    `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-      hasError ? "border-red-500" : "border-gray-300"
-    }`;
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {serverError && (
@@ -87,37 +83,23 @@ export function ResetPasswordForm() {
         </div>
       )}
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-          新しいパスワード
-        </label>
-        <input
-          id="password"
-          type="password"
-          {...register("password")}
-          className={inputClassName(!!errors.password)}
-          placeholder="8文字以上"
-        />
-        {errors.password && (
-          <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-        )}
-      </div>
+      <FormField
+        id="password"
+        label="新しいパスワード"
+        type="password"
+        placeholder="8文字以上"
+        error={errors.password?.message}
+        {...register("password")}
+      />
 
-      <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-          新しいパスワード（確認）
-        </label>
-        <input
-          id="confirmPassword"
-          type="password"
-          {...register("confirmPassword")}
-          className={inputClassName(!!errors.confirmPassword)}
-          placeholder="もう一度入力"
-        />
-        {errors.confirmPassword && (
-          <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
-        )}
-      </div>
+      <FormField
+        id="confirmPassword"
+        label="新しいパスワード（確認）"
+        type="password"
+        placeholder="もう一度入力"
+        error={errors.confirmPassword?.message}
+        {...register("confirmPassword")}
+      />
 
       <button
         type="submit"

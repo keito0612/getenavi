@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations/passwordReset";
+import { FormField } from "@/components/ui";
 
 export function ForgotPasswordForm() {
   const [success, setSuccess] = useState(false);
@@ -58,23 +59,14 @@ export function ForgotPasswordForm() {
         </div>
       )}
 
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          メールアドレス
-        </label>
-        <input
-          id="email"
-          type="email"
-          {...register("email")}
-          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-            errors.email ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder="example@email.com"
-        />
-        {errors.email && (
-          <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-        )}
-      </div>
+      <FormField
+        id="email"
+        label="メールアドレス"
+        type="email"
+        placeholder="example@email.com"
+        error={errors.email?.message}
+        {...register("email")}
+      />
 
       <button
         type="submit"
