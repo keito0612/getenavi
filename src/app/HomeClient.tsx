@@ -78,13 +78,15 @@ export function HomeClient({ initialTags, initialRestaurants }: Props) {
         <LoadingOverlay visible={isLoading} />
         <Map restaurants={restaurants} onMarkerClick={handleMarkerClick} />
 
-        {/* 検索バー: モバイルは上部（右側にズームコントロール分のスペース）、デスクトップは飲食店一覧の右横 */}
-        <div className="absolute top-4 left-4 right-16 z-10 md:left-84 md:right-auto md:w-1/3">
+        {/* 検索バー: モバイルは上部、デスクトップは飲食店一覧/詳細パネルの右横 */}
+        <div className={`absolute top-4 left-4 right-16 z-10 md:right-auto md:w-1/3 transition-[left] duration-300 ${
+          selectedRestaurant ? "md:left-176" : "md:left-84"
+        }`}>
           <SearchBar onSearch={handleSearch} isLoading={isLoading} />
         </div>
 
-        {/* モバイル: 下部にオーバーレイ */}
-        <div className="absolute bottom-0 left-0 right-0 md:hidden">
+        {/* モバイル: 下部にオーバーレイ（ナビゲーションバーの上に配置） */}
+        <div className="absolute bottom-16 left-0 right-0 md:hidden">
           <RestaurantListPanel
             restaurants={restaurants}
             onRestaurantClick={handleMarkerClick}
@@ -98,9 +100,10 @@ export function HomeClient({ initialTags, initialRestaurants }: Props) {
             onRestaurantClick={handleMarkerClick}
           />
         </div>
-      </div>
 
-      <RestaurantDrawer restaurant={selectedRestaurant} onClose={handleCloseDrawer} />
+        {/* 詳細パネル（デスクトップはマップエリア内） */}
+        <RestaurantDrawer restaurant={selectedRestaurant} onClose={handleCloseDrawer} />
+      </div>
     </div>
   );
 }

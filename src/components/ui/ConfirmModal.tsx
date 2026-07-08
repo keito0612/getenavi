@@ -1,19 +1,30 @@
 "use client";
 
 import { useEffect } from "react";
-import { IoCheckmark, IoClose } from "react-icons/io5";
-
-type ModalType = "success" | "error";
+import { IoWarningOutline } from "react-icons/io5";
+import { Button } from "./Button";
 
 type Props = {
   isOpen: boolean;
-  type: ModalType;
   title: string;
   message?: string;
-  onClose: () => void;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isLoading?: boolean;
 };
 
-export function Modal({ isOpen, type, title, message, onClose }: Props) {
+export function ConfirmModal({
+  isOpen,
+  title,
+  message,
+  confirmLabel = "削除",
+  cancelLabel = "キャンセル",
+  onConfirm,
+  onCancel,
+  isLoading = false,
+}: Props) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -27,29 +38,21 @@ export function Modal({ isOpen, type, title, message, onClose }: Props) {
 
   if (!isOpen) return null;
 
-  const isSuccess = type === "success";
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* オーバーレイ */}
       <div
         className="absolute inset-0 bg-black/50"
-        onClick={onClose}
+        onClick={isLoading ? undefined : onCancel}
       />
 
       {/* モーダル本体 */}
       <div className="relative bg-white rounded-xl shadow-xl max-w-sm w-full mx-4 p-6">
         {/* アイコン */}
         <div className="flex justify-center mb-4">
-          {isSuccess ? (
-            <div className="size-16 bg-green-100 rounded-full flex items-center justify-center">
-              <IoCheckmark className="size-8 text-green-500" />
-            </div>
-          ) : (
-            <div className="size-16 bg-red-100 rounded-full flex items-center justify-center">
-              <IoClose className="size-8 text-red-500" />
-            </div>
-          )}
+          <div className="size-16 bg-orange-100 rounded-full flex items-center justify-center">
+            <IoWarningOutline className="size-8 text-orange-500" />
+          </div>
         </div>
 
         {/* タイトル */}
@@ -63,16 +66,24 @@ export function Modal({ isOpen, type, title, message, onClose }: Props) {
         )}
 
         {/* ボタン */}
-        <button
-          onClick={onClose}
-          className={`w-full py-3 rounded-lg font-medium transition-colors ${
-            isSuccess
-              ? "bg-green-500 hover:bg-green-600 text-white"
-              : "bg-red-500 hover:bg-red-600 text-white"
-          }`}
-        >
-          OK
-        </button>
+        <div className="flex gap-3">
+          <Button
+            variant="secondary"
+            fullWidth
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            {cancelLabel}
+          </Button>
+          <Button
+            variant="danger"
+            fullWidth
+            onClick={onConfirm}
+            disabled={isLoading}
+          >
+            {isLoading ? "削除中..." : confirmLabel}
+          </Button>
+        </div>
       </div>
     </div>
   );

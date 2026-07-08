@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
+import { NavigationBottomBar } from "@/components/ui";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
     >
       <body className="h-full">
         <FavoritesProvider>{children}</FavoritesProvider>
+        <NavigationBottomBar />
         <Toaster position="bottom-center" richColors />
       </body>
     </html>

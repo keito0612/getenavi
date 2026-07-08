@@ -19,8 +19,8 @@ export function RestaurantListPanel({ restaurants, onRestaurantClick }: Props) {
 
   return (
     <>
-      {/* モバイル: 横スクロール */}
-      <div className="md:hidden flex gap-3 overflow-x-auto px-4 py-3">
+      {/* モバイル: 横スクロール（スナップでカード単位で切り替え） */}
+      <div className="md:hidden flex gap-4 overflow-x-auto px-4 py-3 snap-x snap-mandatory">
         {restaurants.map((restaurant) => (
           <RestaurantCard
             key={restaurant.id}

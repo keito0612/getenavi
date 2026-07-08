@@ -15,9 +15,6 @@ const MAX_IMAGES = 4;
 
 const imageFileSchema = z
   .instanceof(File)
-  .refine((file) => file.size > 0, {
-    message: "ファイルが空です",
-  })
   .refine((file) => file.size <= MAX_FILE_SIZE_BYTES, {
     message: `ファイルサイズは${MAX_FILE_SIZE_MB}MB以下にしてください`,
   })
@@ -42,7 +39,7 @@ export const createReviewSchema = z.object({
   comment: z
     .string()
     .min(1, { message: "コメントを入力してください" })
-    .max(1000, { message: "コメントは1000文字以内で入力してください" }),
+    .max(300, { message: "コメントは300文字以内で入力してください" }),
   images: imageFilesSchema.optional(),
 });
 
@@ -56,7 +53,7 @@ export const updateReviewSchema = z
     comment: z
       .string()
       .min(1, { message: "コメントを入力してください" })
-      .max(1000, { message: "コメントは1000文字以内で入力してください" }),
+      .max(300, { message: "コメントは300文字以内で入力してください" }),
     images: imageFilesSchema.optional(),
     existingImageUrls: z.array(z.string()).optional(),
   })

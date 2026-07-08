@@ -1,98 +1,205 @@
 "use client";
 
+import { useState } from "react";
+import { IoImageOutline } from "react-icons/io5";
 import type { RestaurantData } from "@/lib/types";
 import { useFavoritesContext } from "@/contexts/FavoritesContext";
+import { useReviews } from "@/hooks/useReviews";
 import {
   DrawerContainer,
   FlexRow,
   Stack,
 } from "@/components/ui/containers";
 import {
-  CloseIcon,
   FavoriteButton,
   DangerLevel,
   TagBadge,
   Thumbnail,
-  IconButton,
+  Spinner,
+  ImageLightbox,
+  ImageWithLoader,
 } from "@/components/ui";
 import { BusinessHoursList } from "./components/BusinessHoursList";
 import { ActionButtons } from "./components/ActionButtons";
+import { ReviewSection } from "./components/ReviewSection";
 
 type Props = {
   restaurant: RestaurantData | null;
   onClose: () => void;
 };
 
+type TabType = "details" | "reviews" | "gallery";
+
 export function RestaurantDrawer({ restaurant, onClose }: Props) {
   const { isFavorite, toggleFavorite } = useFavoritesContext();
+  const [activeTab, setActiveTab] = useState<TabType>("details");
+  const { reviews } = useReviews(restaurant?.id ?? "");
 
   if (!restaurant) return null;
 
-  return (
-    <DrawerContainer onClose={onClose}>
-      <Stack gap="md">
-        {restaurant.imageUrl && (
-          <ImageSection src={restaurant.imageUrl} alt={restaurant.name} />
-        )}
+  // レビューから最初の画像を取得
+  const firstReviewImage = reviews
+    .flatMap((r) => r.images)
+    .map((img) => img.imageUrl)[0];
 
-        <HeaderSection
+  return (
+    <DrawerContainer title={restaurant.name} onClose={onClose}>
+      <Stack gap="md">
+        {/* ヘッダー画像（レビュー画像優先、なければ店舗画像） */}
+        <HeaderImage
+          imageUrl={firstReviewImage || restaurant.imageUrl}
+          alt={restaurant.name}
+        />
+
+        {/* 住所・お気に入り */}
+        <InfoSection
           name={restaurant.name}
           address={restaurant.address}
           isFavorite={isFavorite(restaurant.id)}
           onToggleFavorite={() => toggleFavorite(restaurant.id)}
-          onClose={onClose}
         />
 
-        <DangerLevelSection level={restaurant.dangerLevel} />
-
-        <TagsSection tags={restaurant.tags} />
-
-        {restaurant.description && (
-          <DescriptionSection description={restaurant.description} />
-        )}
-
-        <BusinessHoursList hours={restaurant.businessHours} />
-
-        <ActionButtons
-          url={restaurant.url}
-          detailHref={`/restaurants/${restaurant.id}`}
-          onDetailClick={onClose}
-        />
+        {/* タブ */}
+        <TabsSection activeTab={activeTab} onTabChange={setActiveTab} restaurant={restaurant}></TabsSection>
       </Stack>
     </DrawerContainer>
   );
 }
 
-function ImageSection({ src, alt }: { src: string; alt: string }) {
+function HeaderImage({ imageUrl, alt }: { imageUrl?: string | null; alt: string }) {
   return (
     <div className="-mx-5 -mt-4">
-      <Thumbnail src={src} alt={alt} size="lg" />
+      {imageUrl ? (
+        <Thumbnail src={imageUrl} alt={alt} size="lg" />
+      ) : (
+        <div className="w-full h-48 bg-gray-300 flex items-center justify-center">
+          <IoImageOutline className="w-16 h-16 text-white" />
+        </div>
+      )}
     </div>
   );
 }
 
-type HeaderSectionProps = {
+type InfoSectionProps = {
   name: string;
   address: string;
   isFavorite: boolean;
   onToggleFavorite: () => void;
-  onClose: () => void;
 };
 
-function HeaderSection({ name, address, isFavorite, onToggleFavorite, onClose }: HeaderSectionProps) {
+function InfoSection({ name, address, isFavorite, onToggleFavorite }: InfoSectionProps) {
   return (
     <FlexRow align="between">
-      <div className="flex-1 min-w-0">
+      <Stack gap="sm">
         <h2 className="text-xl font-bold text-gray-900 truncate">{name}</h2>
-        <p className="text-sm text-gray-500 mt-1">{address}</p>
-      </div>
-      <FlexRow gap="sm">
-        <FavoriteButton isFavorite={isFavorite} size="lg" onToggle={onToggleFavorite} />
-        <IconButton onClick={onClose}>
-          <CloseIcon className="w-5 h-5 text-gray-500" />
-        </IconButton>
-      </FlexRow>
+        <p className="text-sm text-gray-500 flex-1">{address}</p>
+      </Stack>
+      <FavoriteButton isFavorite={isFavorite} size="lg" onToggle={onToggleFavorite} />
     </FlexRow>
+  );
+}
+
+type TabBarProps = {
+  activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
+};
+
+function TabBar({ activeTab, onTabChange }: TabBarProps) {
+  const tabs: { id: TabType; label: string }[] = [
+    { id: "details", label: "詳細" },
+    { id: "reviews", label: "レビュー" },
+    { id: "gallery", label: "投稿画像" },
+  ];
+
+  return (
+    <div className="flex border-b border-gray-200">
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => onTabChange(tab.id)}
+          className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === tab.id
+            ? "text-orange-500 border-b-2 border-orange-500"
+            : "text-gray-500 hover:text-gray-700"
+            }`}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function DetailsTab({ restaurant }: { restaurant: RestaurantData }) {
+  return (
+    <Stack gap="md">
+      <DangerLevelSection level={restaurant.dangerLevel} />
+      <TagsSection tags={restaurant.tags} />
+      {restaurant.description && (
+        <DescriptionSection description={restaurant.description} />
+      )}
+      <BusinessHoursList hours={restaurant.businessHours} />
+    </Stack>
+  );
+}
+
+function GalleryTab({ restaurantId }: { restaurantId: string }) {
+  const { reviews, isLoading } = useReviews(restaurantId);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  // 全レビューから画像を抽出
+  const allImages = reviews.flatMap((review) =>
+    review.images.map((img) => ({
+      url: img.imageUrl,
+      reviewId: review.id,
+      userName: review.user.name,
+    }))
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (allImages.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        まだ投稿画像がありません
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-3 gap-2">
+        {allImages.map((img, index) => (
+          <button
+            key={`${img.reviewId}-${index}`}
+            type="button"
+            onClick={() => setSelectedImage(img.url)}
+            className="relative aspect-square rounded-lg overflow-hidden hover:opacity-90 transition-opacity"
+          >
+            <ImageWithLoader
+              src={img.url}
+              alt={`${img.userName}さんの投稿画像`}
+              sizes="(max-width: 768px) 33vw, 128px"
+              spinnerSize="sm"
+            />
+          </button>
+        ))}
+      </div>
+
+      {/* 画像拡大モーダル */}
+      {selectedImage && (
+        <ImageLightbox
+          src={selectedImage}
+          alt="投稿画像（拡大）"
+          onClose={() => setSelectedImage(null)}
+        />
+      )}
+    </>
   );
 }
 
@@ -113,6 +220,26 @@ function TagsSection({ tags }: { tags: RestaurantData["tags"] }) {
       ))}
     </FlexRow>
   );
+}
+
+function TabsSection({ restaurant, activeTab, onTabChange }: { restaurant: RestaurantData, activeTab: TabType, onTabChange: (tab: TabType) => void }) {
+  return (
+    <>
+      <TabBar activeTab={activeTab} onTabChange={onTabChange} />
+      <TabBody restaurant={restaurant} activeTab={activeTab} />
+    </>
+  );
+}
+
+function TabBody({ restaurant, activeTab }: { restaurant: RestaurantData, activeTab: TabType }) {
+  switch (activeTab) {
+    case "details":
+      return <DetailsTab restaurant={restaurant} />
+    case "reviews":
+      return <ReviewSection restaurantId={restaurant.id} />
+    case "gallery":
+      return <GalleryTab restaurantId={restaurant.id} />;
+  }
 }
 
 function DescriptionSection({ description }: { description: string }) {
