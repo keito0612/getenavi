@@ -11,6 +11,7 @@ export type ReviewWithUser = {
   userId: string;
   restaurantId: string;
   rating: number;
+  dangerLevel: number;
   comment: string;
   createdAt: Date;
   updatedAt: Date;
@@ -30,12 +31,13 @@ export interface IReviewRepository {
     userId: string,
     restaurantId: string,
     rating: number,
+    dangerLevel: number,
     comment: string,
     imageUrls?: string[]
   ): Promise<ReviewWithUser>;
   updateReview(
     id: string,
-    data: { rating?: number; comment?: string; imageUrls?: string[] }
+    data: { rating?: number; dangerLevel?: number; comment?: string; imageUrls?: string[] }
   ): Promise<ReviewWithUser>;
   deleteReview(id: string): Promise<void>;
 }
@@ -90,6 +92,7 @@ export class ReviewRepository implements IReviewRepository {
     userId: string,
     restaurantId: string,
     rating: number,
+    dangerLevel: number,
     comment: string,
     imageUrls?: string[]
   ): Promise<ReviewWithUser> {
@@ -98,6 +101,7 @@ export class ReviewRepository implements IReviewRepository {
         userId,
         restaurantId,
         rating,
+        dangerLevel,
         comment,
         images: imageUrls?.length
           ? {
@@ -114,7 +118,7 @@ export class ReviewRepository implements IReviewRepository {
 
   async updateReview(
     id: string,
-    data: { rating?: number; comment?: string; imageUrls?: string[] }
+    data: { rating?: number; dangerLevel?: number; comment?: string; imageUrls?: string[] }
   ): Promise<ReviewWithUser> {
     const { imageUrls, ...reviewData } = data;
 

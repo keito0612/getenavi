@@ -15,6 +15,21 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
   },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // ユーザー作成時に空のProfileを作成
+          await prisma.profile.create({
+            data: {
+              userId: user.id,
+              updatedAt: new Date(),
+            },
+          });
+        },
+      },
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;

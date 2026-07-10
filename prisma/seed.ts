@@ -10,33 +10,21 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   // タグマスターの作成
-  await Promise.all([
-    prisma.tag.upsert({
-      where: { id: "wani" },
-      update: {},
-      create: { id: "wani", name: "ワニ", emoji: "🐊" },
-    }),
-    prisma.tag.upsert({
-      where: { id: "hebi" },
-      update: {},
-      create: { id: "hebi", name: "ヘビ", emoji: "🐍" },
-    }),
-    prisma.tag.upsert({
-      where: { id: "insect" },
-      update: {},
-      create: { id: "insect", name: "昆虫食", emoji: "🐜" },
-    }),
-    prisma.tag.upsert({
-      where: { id: "ostrich" },
-      update: {},
-      create: { id: "ostrich", name: "ダチョウ", emoji: "🦤" },
-    }),
-    prisma.tag.upsert({
-      where: { id: "gibier" },
-      update: {},
-      create: { id: "gibier", name: "ジビエ(鹿・猪)", emoji: "🐗" },
-    }),
-  ]);
+  const wani = await prisma.tag.create({
+    data: { name: "ワニ", emoji: "🐊" },
+  });
+  const hebi = await prisma.tag.create({
+    data: { name: "ヘビ", emoji: "🐍" },
+  });
+  const insect = await prisma.tag.create({
+    data: { name: "昆虫食", emoji: "🐜" },
+  });
+  const ostrich = await prisma.tag.create({
+    data: { name: "ダチョウ", emoji: "🦤" },
+  });
+  const gibier = await prisma.tag.create({
+    data: { name: "ジビエ(鹿・猪)", emoji: "🐗" },
+  });
 
   // サンプル店舗データの作成
   await prisma.restaurant.create({
@@ -49,7 +37,7 @@ async function main() {
       description: "ヘビの生き血や、様々な昆虫の食べ比べができるマニアの聖地。",
       url: "https://example.com/shinjuku",
       tags: {
-        connect: [{ id: "insect" }, { id: "hebi" }, { id: "wani" }],
+        connect: [{ id: insect.id }, { id: hebi.id }, { id: wani.id }],
       },
       businessHours: {
         create: [
@@ -62,7 +50,7 @@ async function main() {
           { dayOfWeek: 0, openTime: null, closeTime: null, isClosed: true },
         ],
       },
-    }
+    },
   });
 
   await prisma.restaurant.create({
@@ -75,7 +63,7 @@ async function main() {
       description: "鹿や猪を中心としたジビエ料理が楽しめる隠れ家的酒場。",
       url: "https://example.com/shibuya",
       tags: {
-        connect: [{ id: "gibier" }],
+        connect: [{ id: gibier.id }],
       },
       businessHours: {
         create: [
@@ -90,6 +78,8 @@ async function main() {
       },
     },
   });
+
+  console.log("Seed completed!");
 }
 
 main()

@@ -8,6 +8,7 @@ import { ProfileHeader } from "./components/ProfileHeader";
 import { ProfileTabs } from "./components/ProfileTabs";
 import { PostsTab } from "./components/PostsTab";
 import { LikesTab } from "./components/LikesTab";
+import { Layout } from "lucide-react";
 
 export function ProfileClient() {
   const router = useRouter();
@@ -24,24 +25,21 @@ export function ProfileClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 pt-14 lg:pt-16">
+    <Layout>
       <Header />
+      <ProfileHeader
+        user={user}
+        reviewCount={0}
+        likeCount={0}
+        isOwner={true}
+      />
 
-      <main>
-        <ProfileHeader
-          user={user}
-          reviewCount={0}
-          likeCount={0}
-          isOwner={true}
-        />
+      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-        <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
-
-        <div className="bg-gray-900">
-          {activeTab === "posts" && <PostsTab userId={user.id} />}
-          {activeTab === "likes" && <LikesTab userId={user.id} />}
-        </div>
-      </main>
-    </div>
+      <div className="bg-gray-900">
+        {activeTab === "posts" && <PostsTab userId={user.id} />}
+        {activeTab === "likes" && <LikesTab userId={user.id} />}
+      </div>
+    </Layout>
   );
 }

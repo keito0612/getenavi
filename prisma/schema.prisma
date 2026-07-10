@@ -32,7 +32,7 @@ model Restaurant {
 
 // 2. 食材タグテーブル
 model Tag {
-  id        String   @id // スラッグ識別子 (例: "wani", "hebi", "insect")
+  id        Int      @id @default(autoincrement())
   name      String // 表示名 (例: "ワニ", "ヘビ", "昆虫食")
   emoji     String? // 表示用絵文字 (例: "🐊", "🐍", "🐜")
   createdAt DateTime @default(now()) @map("created_at")
@@ -62,13 +62,13 @@ model BusinessHour {
 // ============================================
 
 model User {
-  id            String    @id
-  email         String    @unique
-  emailVerified Boolean   @default(false) @map("email_verified")
+  id            String   @id
+  email         String   @unique
+  emailVerified Boolean  @default(false) @map("email_verified")
   name          String
   image         String?
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   sessions            Session[]
   accounts            Account[]
@@ -84,9 +84,8 @@ model User {
 model Profile {
   id              String   @id @default(uuid())
   userId          String   @unique @map("user_id")
-  comment         String?  // 自己紹介
+  comment         String? // 自己紹介
   backgroundImage String?  @map("background_image") // 背景画像URL
-  avatarImage     String?  @map("avatar_image") // ユーザー画像URL
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -175,8 +174,9 @@ model Review {
   id           String   @id @default(uuid())
   userId       String   @map("user_id")
   restaurantId String   @map("restaurant_id")
-  rating       Int      // 1〜5の星評価
-  comment      String   // コメント（必須）
+  rating       Int // 1〜5の星評価
+  dangerLevel  Int      @map("danger_level") // 1〜5の珍食レベル
+  comment      String // コメント（必須）
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 

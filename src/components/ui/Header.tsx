@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IoPersonOutline } from "react-icons/io5";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthUser } from "@/lib/types";
+import Image from 'next/image'
 
 type Props = {
   title?: string;
@@ -53,18 +55,43 @@ function DesktopNavigation({
 }
 
 // ユーザーアイコン
-function UserIcon({ userName }: { userName?: string }) {
-  if (!userName) return null;
-
+function UserImage({ imageUrl }: { imageUrl: string | undefined | null }) {
   return (
     <Link
       href="/mypage"
-      className="size-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+      className="size-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors overflow-hidden relative"
     >
-      <IoPersonOutline className="size-5 text-amber-600" />
+      {imageUrl ? (
+        <Image
+          src={imageUrl}
+          alt="ユーザーの画像"
+          fill
+          className="object-cover"
+        />
+      ) : (
+        <IoPersonOutline className="size-5 text-amber-600" />
+      )}
     </Link>
   );
 }
+
+function UserInfo({ user }: { user: AuthUser }) {
+  return (
+    <>
+      {
+        user && <UserName name={user.name} />
+      }
+      <UserImage imageUrl={user ? user.image : undefined} />
+    </>
+  );
+}
+
+function UserName({ name }: { name: string }) {
+  return (
+    <span className="font-bold text-white text-xl max-w-[10ch] truncate inline-block">{name}</span>
+  );
+}
+
 
 // ロゴ
 function HeaderLogo() {
@@ -77,7 +104,7 @@ function HeaderLogo() {
 
 // デスクトップヘッダー（認証状態に応じたナビゲーション）
 function DesktopHeader() {
-  const { user, isAuthenticated, isPending } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const filteredNavigation = isAuthenticated
     ? navigation.filter(
@@ -85,23 +112,12 @@ function DesktopHeader() {
     )
     : navigation;
 
-  if (isPending) {
-    return (
-      <div className="hidden md:flex items-center justify-between w-full">
-        <HeaderLogo />
-        <div className="flex items-center gap-3">
-          <DesktopNavigation navigations={[{ name: "検索", href: "/" }]} />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="hidden md:flex items-center justify-between w-full">
       <HeaderLogo />
       <div className="flex items-center gap-3">
         <DesktopNavigation navigations={filteredNavigation} />
-        <UserIcon userName={user?.name} />
+        <UserInfo user={user} />
       </div>
     </div>
   );

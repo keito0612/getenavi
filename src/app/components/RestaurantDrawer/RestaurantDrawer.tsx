@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/containers";
 import {
   FavoriteButton,
-  DangerLevel,
   TagBadge,
   Thumbnail,
   Spinner,
@@ -22,6 +21,7 @@ import {
 import { BusinessHoursList } from "./components/BusinessHoursList";
 import { ActionButtons } from "./components/ActionButtons";
 import { ReviewSection } from "./components/ReviewSection";
+import { DangerLevelRating } from "./components/DangerLevelRating";
 
 type Props = {
   restaurant: RestaurantData | null;
@@ -60,7 +60,16 @@ export function RestaurantDrawer({ restaurant, onClose }: Props) {
         />
 
         {/* タブ */}
-        <TabsSection activeTab={activeTab} onTabChange={setActiveTab} restaurant={restaurant}></TabsSection>
+        <TabsSection
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          restaurant={restaurant}
+          averageDangerLevel={
+            reviews.length > 0
+              ? reviews.reduce((sum, r) => sum + r.dangerLevel, 0) / reviews.length
+              : 0
+          }
+        />
       </Stack>
     </DrawerContainer>
   );
@@ -129,10 +138,10 @@ function TabBar({ activeTab, onTabChange }: TabBarProps) {
   );
 }
 
-function DetailsTab({ restaurant }: { restaurant: RestaurantData }) {
+function DetailsTab({ restaurant, averageDangerLevel }: { restaurant: RestaurantData; averageDangerLevel: number }) {
   return (
     <Stack gap="md">
-      <DangerLevelSection level={restaurant.dangerLevel} />
+      <DangerLevelSection level={averageDangerLevel} />
       <TagsSection tags={restaurant.tags} />
       {restaurant.description && (
         <DescriptionSection description={restaurant.description} />
@@ -204,10 +213,15 @@ function GalleryTab({ restaurantId }: { restaurantId: string }) {
 }
 
 function DangerLevelSection({ level }: { level: number }) {
+  const roundedLevel = Math.round(level);
+
   return (
     <FlexRow gap="md">
       <span className="text-sm text-gray-600">珍食レベル:</span>
-      <DangerLevel level={level} />
+      <div className="flex items-center gap-2">
+        <DangerLevelRating level={roundedLevel} readonly size="md" />
+        <span className="text-sm text-gray-500">({level.toFixed(1)})</span>
+      </div>
     </FlexRow>
   );
 }
@@ -222,19 +236,19 @@ function TagsSection({ tags }: { tags: RestaurantData["tags"] }) {
   );
 }
 
-function TabsSection({ restaurant, activeTab, onTabChange }: { restaurant: RestaurantData, activeTab: TabType, onTabChange: (tab: TabType) => void }) {
+function TabsSection({ restaurant, activeTab, onTabChange, averageDangerLevel }: { restaurant: RestaurantData; activeTab: TabType; onTabChange: (tab: TabType) => void; averageDangerLevel: number }) {
   return (
     <>
       <TabBar activeTab={activeTab} onTabChange={onTabChange} />
-      <TabBody restaurant={restaurant} activeTab={activeTab} />
+      <TabBody restaurant={restaurant} activeTab={activeTab} averageDangerLevel={averageDangerLevel} />
     </>
   );
 }
 
-function TabBody({ restaurant, activeTab }: { restaurant: RestaurantData, activeTab: TabType }) {
+function TabBody({ restaurant, activeTab, averageDangerLevel }: { restaurant: RestaurantData; activeTab: TabType; averageDangerLevel: number }) {
   switch (activeTab) {
     case "details":
-      return <DetailsTab restaurant={restaurant} />
+      return <DetailsTab restaurant={restaurant} averageDangerLevel={averageDangerLevel} />
     case "reviews":
       return <ReviewSection restaurantId={restaurant.id} />
     case "gallery":

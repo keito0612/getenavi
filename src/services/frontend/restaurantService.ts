@@ -6,7 +6,7 @@ import type { RestaurantData } from "@/lib/types";
 
 export type FrontendRestaurantQueryParams = {
   query?: string;
-  tags?: string[];
+  tags?: number[];
 };
 
 export class FrontendRestaurantService {

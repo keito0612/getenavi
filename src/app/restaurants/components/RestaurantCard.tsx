@@ -60,16 +60,12 @@ function CardHeader({ name, isFavorite, onToggleFavorite }: CardHeaderProps) {
 
 function CardTags({ tags }: { tags: RestaurantData["tags"] }) {
   const visibleTags = tags.slice(0, 3);
-  const remainingCount = tags.length - 3;
 
   return (
     <FlexRow gap="sm" wrap className="mt-2">
       {visibleTags.map((tag) => (
         <TagBadge key={tag.id} emoji={tag.emoji} name={tag.name} variant="small" />
       ))}
-      {remainingCount > 0 && (
-        <span className="text-xs text-gray-400">+{remainingCount}</span>
-      )}
     </FlexRow>
   );
 }

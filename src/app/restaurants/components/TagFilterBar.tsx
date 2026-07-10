@@ -2,8 +2,8 @@ import type { TagData } from "@/lib/types";
 
 type Props = {
   tags: TagData[];
-  selectedTags: string[];
-  onTagToggle: (tagId: string) => void;
+  selectedTags: number[];
+  onTagToggle: (tagId: number) => void;
 };
 
 export function TagFilterBar({ tags, selectedTags, onTagToggle }: Props) {

@@ -22,12 +22,12 @@ type Props = {
 
 export function HomeClient({ initialTags, initialRestaurants }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState<RestaurantData | null>(null);
   const [restaurants, setRestaurants] = useState(initialRestaurants);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchRestaurants = useCallback(async (query: string, tags: string[]) => {
+  const fetchRestaurants = useCallback(async (query: string, tags: number[]) => {
     setIsLoading(true);
     try {
       const results = await frontendRestaurantService.getRestaurants({
@@ -47,7 +47,7 @@ export function HomeClient({ initialTags, initialRestaurants }: Props) {
     fetchRestaurants(query, selectedTags);
   }, [selectedTags, fetchRestaurants]);
 
-  const handleTagToggle = useCallback(async (tagId: string) => {
+  const handleTagToggle = useCallback(async (tagId: number) => {
     const newSelectedTags = selectedTags.includes(tagId)
       ? selectedTags.filter((id) => id !== tagId)
       : [...selectedTags, tagId];

@@ -53,7 +53,9 @@ export function Map({ restaurants, onMarkerClick }: Props) {
 
       {/* 飲食店マーカー */}
       {restaurants.map((restaurant) => {
-        const style = getDangerLevelStyle(restaurant.dangerLevel);
+        const avgLevel = restaurant.reviewAverageDangerLevel;
+        const roundedLevel = Math.round(avgLevel);
+        const style = getDangerLevelStyle(roundedLevel || 1);
         return (
           <Marker
             key={restaurant.id}
@@ -73,7 +75,7 @@ export function Map({ restaurants, onMarkerClick }: Props) {
               `}
             >
               <span className="text-white text-xs font-bold">
-                {restaurant.dangerLevel}
+                {roundedLevel}
               </span>
             </div>
           </Marker>

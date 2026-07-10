@@ -34,7 +34,11 @@ export function RegisterForm() {
     });
 
     if (error) {
-      if (error.code === "USER_ALREADY_EXISTS") {
+      const isUserExists =
+        error.code === "USER_ALREADY_EXISTS" ||
+        error.message?.includes("User already exists");
+
+      if (isUserExists) {
         setError("email", { message: "このメールアドレスは既に登録されています" });
       } else {
         setModal({

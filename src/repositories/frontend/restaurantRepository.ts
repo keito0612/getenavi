@@ -2,19 +2,19 @@ import type { RestaurantData } from "@/lib/types";
 import { UtilApi, ApiError } from "@/lib/utilApi";
 
 export interface IFrontendRestaurantRepository {
-  getRestaurants(params?: { query?: string; tags?: string[] }): Promise<RestaurantData[]>;
+  getRestaurants(params?: { query?: string; tags?: number[] }): Promise<RestaurantData[]>;
   getRestaurant(id: string): Promise<RestaurantData | null>;
 }
 
 export class FrontendRestaurantRepository implements IFrontendRestaurantRepository {
-  async getRestaurants(params?: { query?: string; tags?: string[] }): Promise<RestaurantData[]> {
+  async getRestaurants(params?: { query?: string; tags?: number[] }): Promise<RestaurantData[]> {
     const searchParams = new URLSearchParams();
 
     if (params?.query) {
       searchParams.set("q", params.query);
     }
     if (params?.tags && params.tags.length > 0) {
-      searchParams.set("tags", params.tags.join(","));
+      searchParams.set("tags", params.tags.map(String).join(","));
     }
 
     const baseUrl = UtilApi.buildUrl("/api/restaurants");

@@ -3,18 +3,22 @@ import { profileRepository, IProfileRepository } from "@/repositories/profileRep
 import { updateProfileSchema } from "@/lib/validations/profile";
 import { ApiResponse } from "@/lib/api";
 import { verifyBearerToken } from "@/lib/auth/verifyToken";
+import { AuthResult } from "@/lib/types";
 
 export class ProfileService {
-  constructor(private readonly repository: IProfileRepository) {}
+  constructor(private readonly repository: IProfileRepository) { }
 
-  async getProfile(request: NextRequest): Promise<NextResponse> {
-    const auth = await verifyBearerToken(request.headers);
-    if (!auth) {
-      return ApiResponse.unauthorized();
+  async getProfile(request: NextRequest, id: string | undefined = undefined): Promise<NextResponse> {
+    let auth: AuthResult;
+    if (id === undefined) {
+      const auth = await verifyBearerToken(request.headers);
+      if (!auth) {
+        return ApiResponse.unauthorized();
+      }
     }
 
     try {
-      const profile = await this.repository.getByUserId(auth.userId);
+      const profile = await this.repository.getByUserId(id !== undefined ? id : auth!.userId);
       return ApiResponse.success({ profile });
     } catch (error) {
       console.error("Error fetching profile:", error);

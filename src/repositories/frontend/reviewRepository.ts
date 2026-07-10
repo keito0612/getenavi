@@ -26,6 +26,7 @@ export class FrontendReviewRepository implements IFrontendReviewRepository {
   async createReview(restaurantId: string, data: CreateReviewInput): Promise<ReviewData> {
     const formData = new FormData();
     formData.append("rating", String(data.rating));
+    formData.append("dangerLevel", String(data.dangerLevel));
     formData.append("comment", data.comment);
 
     if (data.images) {
@@ -64,6 +65,7 @@ export class FrontendReviewRepository implements IFrontendReviewRepository {
   ): Promise<ReviewData> {
     const formData = new FormData();
     formData.append("rating", String(data.rating));
+    formData.append("dangerLevel", String(data.dangerLevel));
     formData.append("comment", data.comment);
 
     if (data.existingImageUrls) {

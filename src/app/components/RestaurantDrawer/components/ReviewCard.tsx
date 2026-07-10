@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ReviewData } from "@/lib/types";
 import { ImageLightbox, ImageWithLoader, Button, ConfirmModal } from "@/components/ui";
 import { StarRating } from "./StarRating";
+import { DangerLevelRating } from "./DangerLevelRating";
 
 type Props = {
   review: ReviewData;
@@ -47,7 +48,10 @@ export function ReviewCard({ review, isOwner, onEdit, onDelete }: Props) {
             <p className="text-xs text-gray-500">{review.timeAgo}</p>
           </div>
         </div>
-        <StarRating rating={review.rating} readonly size="sm" />
+        <div className="flex flex-col items-end gap-1">
+          <StarRating rating={review.rating} readonly size="sm" />
+          <DangerLevelRating level={review.dangerLevel} readonly size="sm" />
+        </div>
       </div>
 
       <p className="mt-3 text-gray-700 whitespace-pre-wrap">{review.comment}</p>

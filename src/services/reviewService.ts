@@ -19,6 +19,7 @@ function toReviewData(review: ReviewWithUser): ReviewData {
   return {
     id: review.id,
     rating: review.rating,
+    dangerLevel: review.dangerLevel,
     comment: review.comment,
     createdAt: review.createdAt.toISOString(),
     updatedAt: review.updatedAt.toISOString(),
@@ -91,12 +92,14 @@ export class ReviewService {
     }
 
     const rating = Number(formData.get("rating"));
+    const dangerLevel = Number(formData.get("dangerLevel"));
     const comment = formData.get("comment") as string;
     const images = (formData.getAll("images") as File[]).filter((img) => img.size > 0);
 
     // バリデーション（画像含む）
     const bodyResult = createReviewSchema.safeParse({
       rating,
+      dangerLevel,
       comment,
       images: images.length > 0 ? images : undefined,
     });
@@ -127,6 +130,7 @@ export class ReviewService {
         this.userId,
         restaurantResult.data.restaurantId,
         bodyResult.data.rating,
+        bodyResult.data.dangerLevel,
         bodyResult.data.comment,
         imageUrls
       );
@@ -162,6 +166,7 @@ export class ReviewService {
     }
 
     const rating = Number(formData.get("rating"));
+    const dangerLevel = Number(formData.get("dangerLevel"));
     const comment = formData.get("comment") as string;
     const images = (formData.getAll("images") as File[]).filter((img) => img.size > 0);
     const existingImageUrls = formData.getAll("existingImageUrls") as string[];
@@ -169,6 +174,7 @@ export class ReviewService {
     // バリデーション（画像・合計枚数含む）
     const bodyResult = updateReviewSchema.safeParse({
       rating,
+      dangerLevel,
       comment,
       images: images.length > 0 ? images : undefined,
       existingImageUrls: existingImageUrls.length > 0 ? existingImageUrls : undefined,
@@ -210,6 +216,7 @@ export class ReviewService {
 
       const review = await this.repository.updateReview(reviewResult.data.reviewId, {
         rating: bodyResult.data.rating,
+        dangerLevel: bodyResult.data.dangerLevel,
         comment: bodyResult.data.comment,
         imageUrls: finalImageUrls,
       });

@@ -68,7 +68,6 @@ function FavoritesContent({ isLoading, restaurants, onRemove }: ContentProps) {
     return (
       <div className="py-8">
         <EmptyState
-          emoji="💔"
           message="お気に入りに登録された店舗がありません"
           action={<FindRestaurantsLink />}
         />

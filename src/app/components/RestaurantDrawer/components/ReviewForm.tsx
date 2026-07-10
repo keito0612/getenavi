@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { StarRating } from "./StarRating";
+import { DangerLevelRating } from "./DangerLevelRating";
 import ImageUploader from "@/components/ui/ImageUploader";
 import { LoadingOverlay, FormTextarea, Button } from "@/components/ui";
 import { createReviewSchema, type CreateReviewInput } from "@/lib/validations/review";
@@ -14,12 +15,14 @@ import { createReviewSchema, type CreateReviewInput } from "@/lib/validations/re
 
 type CreateSubmitData = {
   rating: number;
+  dangerLevel: number;
   comment: string;
   images?: File[];
 };
 
 type UpdateSubmitData = {
   rating: number;
+  dangerLevel: number;
   comment: string;
   newImages?: File[];
   existingImageUrls?: string[];
@@ -27,6 +30,7 @@ type UpdateSubmitData = {
 
 type Props = {
   initialRating?: number;
+  initialDangerLevel?: number;
   initialComment?: string;
   initialImages?: string[];
   onSubmit: (data: CreateSubmitData | UpdateSubmitData) => Promise<boolean>;
@@ -41,6 +45,7 @@ type Props = {
 
 export function ReviewForm({
   initialRating = 0,
+  initialDangerLevel = 0,
   initialComment = "",
   initialImages = [],
   onSubmit,
@@ -59,6 +64,7 @@ export function ReviewForm({
     resolver: zodResolver(createReviewSchema),
     defaultValues: {
       rating: initialRating,
+      dangerLevel: initialDangerLevel,
       comment: initialComment,
       images: [],
     },
@@ -66,6 +72,7 @@ export function ReviewForm({
 
   const comment = useWatch({ control, name: "comment" });
   const rating = useWatch({ control, name: "rating" });
+  const dangerLevel = useWatch({ control, name: "dangerLevel" });
 
   // 既存画像URL（編集時のみ使用、zodバリデーション対象外）
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>(initialImages);
@@ -76,6 +83,7 @@ export function ReviewForm({
     if (isEditMode) {
       success = await onSubmit({
         rating: data.rating,
+        dangerLevel: data.dangerLevel,
         comment: data.comment,
         newImages: data.images,
         existingImageUrls,
@@ -83,13 +91,14 @@ export function ReviewForm({
     } else {
       success = await onSubmit({
         rating: data.rating,
+        dangerLevel: data.dangerLevel,
         comment: data.comment,
         images: data.images,
       });
     }
 
     if (success) {
-      reset({ rating: 0, comment: "", images: [] });
+      reset({ rating: 0, dangerLevel: 0, comment: "", images: [] });
       setExistingImageUrls([]);
     }
   };
@@ -111,6 +120,28 @@ export function ReviewForm({
         {errors.rating && (
           <p className="mt-1 text-sm text-red-600">{errors.rating.message}</p>
         )}
+      </div>
+
+      {/* 珍食レベル */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          珍食レベル
+        </label>
+        <DangerLevelRating
+          level={dangerLevel}
+          onChange={(value) => setValue("dangerLevel", value, { shouldValidate: true })}
+          size="lg"
+        />
+        {errors.dangerLevel && (
+          <p className="mt-1 text-sm text-red-600">{errors.dangerLevel.message}</p>
+        )}
+        <p className="mt-2 text-xs text-gray-500">
+          1: 初心者向け（見た目は普通、味も食べやすい）<br />
+          2: やや珍しい（少し変わった食材や調理法）<br />
+          3: 中級者向け（見た目や味にインパクトあり）<br />
+          4: 上級者向け（かなり刺激的な体験）<br />
+          5: 超ゲテモノ（覚悟が必要）
+        </p>
       </div>
 
       {/* コメント */}

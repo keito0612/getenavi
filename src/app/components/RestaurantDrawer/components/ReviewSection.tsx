@@ -96,6 +96,7 @@ export function ReviewSection({ restaurantId }: Props) {
   // 投稿処理
   const handleCreate = async (data: {
     rating: number;
+    dangerLevel: number;
     comment: string;
     images?: File[];
   }) => {
@@ -122,6 +123,7 @@ export function ReviewSection({ restaurantId }: Props) {
   // 更新処理
   const handleUpdate = async (data: {
     rating: number;
+    dangerLevel: number;
     comment: string;
     newImages?: File[];
     existingImageUrls?: string[];
@@ -226,6 +228,7 @@ export function ReviewSection({ restaurantId }: Props) {
         {editingReview && (
           <ReviewForm
             initialRating={editingReview.rating}
+            initialDangerLevel={editingReview.dangerLevel}
             initialComment={editingReview.comment}
             initialImages={editingReview.images?.map((img) => img.imageUrl) ?? []}
             onSubmit={handleUpdate}

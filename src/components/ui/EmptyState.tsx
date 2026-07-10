@@ -1,16 +1,16 @@
+import { IoSearchOutline } from "react-icons/io5";
 import type { ReactNode } from "react";
 
 type Props = {
-  emoji: string;
   message: string;
   action?: ReactNode;
 };
 
-export function EmptyState({ emoji, message, action }: Props) {
+export function EmptyState({ message, action }: Props) {
   return (
-    <div className="text-center py-12 text-gray-500">
-      <span className="text-4xl block mb-2">{emoji}</span>
-      <p className="mb-4">{message}</p>
+    <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <IoSearchOutline className="w-12 h-12 mb-4" />
+      <p className="mb-4 text-2xl">{message}</p>
       {action}
     </div>
   );

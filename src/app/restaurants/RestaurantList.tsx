@@ -17,13 +17,13 @@ type Props = {
 };
 
 export function RestaurantList({ initialRestaurants, tags }: Props) {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [restaurants, setRestaurants] = useState(initialRestaurants);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { isFavorite, toggleFavorite } = useFavoritesContext();
 
-  const handleTagToggle = useCallback(async (tagId: string) => {
+  const handleTagToggle = useCallback(async (tagId: number) => {
     const newSelectedTags = selectedTags.includes(tagId)
       ? selectedTags.filter((id) => id !== tagId)
       : [...selectedTags, tagId];
@@ -101,7 +101,7 @@ function ListContent({ isLoading, restaurants, isFavorite, onToggleFavorite }: L
   }
 
   if (restaurants.length === 0) {
-    return <EmptyState emoji="🔍" message="該当する店舗がありません" />;
+    return <EmptyState message="該当する店舗がありません" />;
   }
 
   return (

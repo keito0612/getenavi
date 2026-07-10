@@ -11,12 +11,14 @@ import type { ReviewData } from "@/lib/types";
 
 type CreateReviewData = {
   rating: number;
+  dangerLevel: number;
   comment: string;
   images?: File[];
 };
 
 type UpdateReviewData = {
   rating: number;
+  dangerLevel: number;
   comment: string;
   newImages?: File[];
   existingImageUrls?: string[];

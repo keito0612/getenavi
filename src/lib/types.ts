@@ -2,11 +2,14 @@
 // User types
 // ============================================
 
+import { User } from "better-auth";
+
 /** フロントエンド用ユーザーデータ */
 export type UserData = {
   id: string;
   name: string;
   email: string;
+  image: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -41,7 +44,6 @@ export type ProfileData = {
   userId: string;
   comment: string | null;
   backgroundImage: string | null;
-  avatarImage: string | null;
   createdAt: Date;
   updatedAt: Date;
   user: Pick<UserData, "id" | "name" | "email">;
@@ -65,7 +67,7 @@ export type ModalState = {
 
 /** タグデータ */
 export type TagData = {
-  id: string;
+  id: number;
   name: string;
   emoji: string | null;
   createdAt: Date;
@@ -98,6 +100,8 @@ export type RestaurantData = {
   longitude: number;
   url: string | null;
   dangerLevel: number;
+  reviewAverageDangerLevel: number;
+  firstReviewImageUrl: string | null;
   description: string | null;
   imageUrl: string | null;
   createdAt: Date;
@@ -119,7 +123,7 @@ export type TagListResponse = {
 /** 飲食店検索パラメータ */
 export type RestaurantQueryParams = {
   query?: string;
-  tags?: string[];
+  tags?: number[];
   bounds?: {
     north: number;
     south: number;
@@ -158,6 +162,7 @@ export type ReviewImageData = {
 export type ReviewData = {
   id: string;
   rating: number;
+  dangerLevel: number;
   comment: string;
   createdAt: string;
   updatedAt: string;
@@ -178,6 +183,7 @@ export type ReviewListResponse = {
 /** レビュー投稿リクエスト */
 export type CreateReviewInput = {
   rating: number;
+  dangerLevel: number;
   comment: string;
   images?: File[];
 };
@@ -185,7 +191,10 @@ export type CreateReviewInput = {
 /** レビュー更新リクエスト */
 export type UpdateReviewInput = {
   rating: number;
+  dangerLevel: number;
   comment: string;
   newImages?: File[];
   existingImageUrls?: string[];
 };
+
+export type AuthUser = User | null;

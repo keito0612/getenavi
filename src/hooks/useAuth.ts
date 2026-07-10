@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { User } from "better-auth";
+import { AuthUser } from "@/lib/types";
 
 const TOKEN_KEY = "auth_token";
 
@@ -21,8 +22,6 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-// 認証ユーザー型定義
-type AuthUser = User | null;
 
 type UseAuthReturn = {
   user: AuthUser;
@@ -143,8 +142,9 @@ export const signUp = {
       });
       return result;
     } catch (err) {
-      options?.onError?.({ error: err instanceof Error ? err : new Error("Sign up failed") });
-      throw err;
+      const error = err instanceof Error ? err : new Error("Sign up failed");
+      options?.onError?.({ error });
+      return { error, data: null };
     }
   },
 };

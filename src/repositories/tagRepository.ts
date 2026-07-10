@@ -3,7 +3,7 @@ import type { Tag } from "@prisma/client";
 
 export interface ITagRepository {
   getTags(): Promise<Tag[]>;
-  getTag(id: string): Promise<Tag | null>;
+  getTag(id: number): Promise<Tag | null>;
 }
 
 export class TagRepository implements ITagRepository {
@@ -13,7 +13,7 @@ export class TagRepository implements ITagRepository {
     });
   }
 
-  async getTag(id: string): Promise<Tag | null> {
+  async getTag(id: number): Promise<Tag | null> {
     return prisma.tag.findUnique({
       where: { id },
     });

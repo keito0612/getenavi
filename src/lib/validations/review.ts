@@ -36,6 +36,11 @@ export const createReviewSchema = z.object({
     .int({ message: "評価は整数で入力してください" })
     .min(1, { message: "評価は1以上で入力してください" })
     .max(5, { message: "評価は5以下で入力してください" }),
+  dangerLevel: z
+    .number()
+    .int({ message: "珍食レベルは整数で入力してください" })
+    .min(1, { message: "珍食レベルは1以上で入力してください" })
+    .max(5, { message: "珍食レベルは5以下で入力してください" }),
   comment: z
     .string()
     .min(1, { message: "コメントを入力してください" })
@@ -50,6 +55,11 @@ export const updateReviewSchema = z
       .int({ message: "評価は整数で入力してください" })
       .min(1, { message: "評価は1以上で入力してください" })
       .max(5, { message: "評価は5以下で入力してください" }),
+    dangerLevel: z
+      .number()
+      .int({ message: "珍食レベルは整数で入力してください" })
+      .min(1, { message: "珍食レベルは1以上で入力してください" })
+      .max(5, { message: "珍食レベルは5以下で入力してください" }),
     comment: z
       .string()
       .min(1, { message: "コメントを入力してください" })

@@ -24,7 +24,7 @@ export class RestaurantService {
       }
 
       const { q: query, tags: tagsParam, north, south, east, west } = result.data;
-      const tags = tagsParam ? tagsParam.split(",") : undefined;
+      const tags = tagsParam ? tagsParam.split(",").map(Number) : undefined;
 
       let restaurants;
       if (north !== undefined && south !== undefined && east !== undefined && west !== undefined) {
